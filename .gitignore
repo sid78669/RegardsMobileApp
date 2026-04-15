@@ -1,0 +1,88 @@
+# ---------- macOS ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ---------- Editors / IDEs ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------- iOS / Xcode / Swift ----------
+# Build products
+ios/build/
+ios/DerivedData/
+ios/**/build/
+ios/**/DerivedData/
+
+# Xcode user data
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+.build/
+
+# CocoaPods (if ever used)
+ios/Pods/
+ios/**/Pods/
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots/**/*.png
+ios/fastlane/test_output
+
+# ---------- Android / Kotlin / Gradle ----------
+android/build/
+android/**/build/
+android/.gradle/
+android/**/.gradle/
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+android/**/*.iml
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Android Studio
+android/.navigation/
+android/output.json
+
+# ---------- Secrets / signing ----------
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.provisionprofile
+ios/**/GoogleService-Info.plist
+android/**/google-services.json
+.env
+.env.*
+secrets.properties
+keystore.properties
+
+# ---------- Journal working files (drafts stay local) ----------
+# Keep published post .md files tracked; ignore scratch work
+journal/drafts/
+journal/.scratch/
+
+# ---------- Claude / tooling scratch ----------
+.claude/
+.auto-memory/
