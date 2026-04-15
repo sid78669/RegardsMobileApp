@@ -12,7 +12,7 @@ That loop — noticing, feeling bad, forgetting, noticing again, feeling worse �
 
 ## What the existing tools couldn't do for me
 
-I tried, in roughly this order: calendar reminders, a Notion database, a Google Sheet, Apple Reminders with recurring tasks, and then a handful of apps built specifically for this job — [Fabriq](https://fabriq.app), [Garden](https://www.garden-app.io), [Catchup](https://apps.apple.com/us/app/catchup-stay-in-touch/id1542622053), [Friend Reminder](https://apps.apple.com/us/app/friend-reminder/id1604626975), [Socially](https://apps.apple.com/us/app/socially-personal-crm-app/id1478075923), [Cloze](https://www.cloze.com), and [Contacts Journal](https://www.contactsjournal.com). Each of them is good at something. Some of them are good at a lot of things. The category isn't new and I don't want to pretend it is.
+I tried, in roughly this order: calendar reminders, a Notion database, a Google Sheet, Apple Reminders with recurring tasks, and then a handful of apps built specifically for this job — [Fabriq](https://apps.apple.com/us/app/fabriq-stay-in-touch/id1460143202), [Garden](https://apps.apple.com/us/app/garden-stay-in-touch/id1230466454), [Catchup](https://apps.apple.com/us/app/catchup-stay-in-touch/id6450726946), [Friend Reminder](https://apps.apple.com/us/app/friend-reminder-stay-in-touch/id6757976209), [Socially](https://apps.apple.com/us/app/socially-friends-reminder/id6443908151), [Cloze](https://apps.apple.com/us/app/cloze-relationship-management/id596927802), and [Contacts Journal](https://www.contactsjournal.com). Each of them is good at something. Some of them are good at a lot of things. The category isn't new and I don't want to pretend it is.
 
 What I couldn't find was the specific slice I wanted. A few things kept not working for me personally:
 
@@ -20,7 +20,7 @@ The reminders fired at the wrong times. My phone would buzz at 2pm on a Wednesda
 
 The reminders pointed at the app, not at the action. I'd tap the notification and land inside the reminder app, where I'd see a list that said "reach out to Alex." Then I'd leave that app, open WhatsApp, search for Alex, and by the time I got there the activation energy had mostly drained out of me. Three or four taps of friction is enough to lose me. I needed the reminder to deposit me directly inside the app I was actually going to message from, with the right contact pulled up.
 
-The subscription model bothered me more than I expected it to. A personal-CRM app that reads my private contact list and asks me for $10 a month creates a relationship where I'm on the hook forever for something that has no ongoing costs on the developer's side. I understand why subscriptions exist and I don't begrudge the developers who use them — it's how indie apps survive. But for something this personal, with this much on-device data, I wanted to pay once and be done. I wanted the developer's incentives and mine aligned from day one.
+The subscription model bothered me more than I expected it to. A personal-CRM app that reads my private contact list and asks me for $5 a month creates a relationship where I'm on the hook forever for something that has no ongoing costs on the developer's side. I understand why subscriptions exist and I don't begrudge the developers who use them — it's how indie apps survive. But for something this personal, with this much on-device data, I wanted to pay once and be done. I wanted the developer's incentives and mine aligned from day one.
 
 And — the one that mattered most — I was uncomfortable handing my entire contacts list to anything with a backend. Not because I thought anyone specific was doing something bad. Because "we don't sell your data" is a promise, and promises in the tech industry have a half-life. If an app doesn't *have* a server, it can't leak, can't be breached, can't be sold, can't pivot to ads in year three. The only way to make that claim durable is to architect the app so it's technically incapable of phoning home.
 
@@ -70,6 +70,6 @@ None of that changes the privacy architecture of the app itself. Regards has no 
 - **This Substack:** you're here. Subscribe if you want the next post in your inbox; every post will link back to the repo and, when it exists, the app download.
 - **Feedback:** reply to any post, or open a GitHub issue. Both reach me.
 
-The first real code commit is imminent — starting on iOS with the domain layer and the eight-screen navigation shell. Regards is a one-person project, so I can only build one platform at a time: iOS ships first, Android follows. Next post will be the tour through the apps that came before Regards and what each of them taught me about this space. See you in two weeks.
+The first real code commits are coming in the next couple of weeks — starting on iOS with the domain layer and the eight-screen navigation shell. Regards is a one-person project, so I can only build one platform at a time: iOS ships first, Android follows. Next post will be the tour through the apps that came before Regards and what each of them taught me about this space. See you in two weeks.
 
 — Sid
