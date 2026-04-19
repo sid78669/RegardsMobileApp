@@ -86,20 +86,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		23C990CBA86F629D53D6832D /* DesignSystem */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = DesignSystem;
-			sourceTree = "<group>";
-		};
-		3C7F3DCF5DAE309C6391DED2 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Features;
-			sourceTree = "<group>";
-		};
 		443A7986B828BE01D00DE648 /* RegardsTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -112,22 +98,10 @@
 			isa = PBXGroup;
 			children = (
 				C61D7615C2B4D18278ED1133 /* App */,
-				7B7D10E3817368C7FA78658F /* Data */,
-				23C990CBA86F629D53D6832D /* DesignSystem */,
-				5517F62CA3C165449359EAFD /* Domain */,
-				3C7F3DCF5DAE309C6391DED2 /* Features */,
-				9AE99CE389EF180E02EE0D12 /* Platform */,
 				01439D776A5B566F62B3E5A0 /* Resources */,
 				07DFCE9573BE0729618E8E9F /* PrivacyInfo.xcprivacy */,
 			);
 			path = Regards;
-			sourceTree = "<group>";
-		};
-		5517F62CA3C165449359EAFD /* Domain */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Domain;
 			sourceTree = "<group>";
 		};
 		55F1FCE831F482BAA7480203 /* RegardsAccessibilityTests */ = {
@@ -136,13 +110,6 @@
 				479B4EFD6960B8E62D8635BE /* LaunchAccessibilityTests.swift */,
 			);
 			path = RegardsAccessibilityTests;
-			sourceTree = "<group>";
-		};
-		7B7D10E3817368C7FA78658F /* Data */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Data;
 			sourceTree = "<group>";
 		};
 		825211A5549B806C2334ED5E /* Products */ = {
@@ -154,13 +121,6 @@
 				41BCF034E33E6A28F1BD26F0 /* RegardsUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		9AE99CE389EF180E02EE0D12 /* Platform */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Platform;
 			sourceTree = "<group>";
 		};
 		C61D7615C2B4D18278ED1133 /* App */ = {

@@ -8,7 +8,6 @@ options:
   xcodeVersion: "26.0"
   createIntermediateGroups: true
   groupSortPosition: top
-  generateEmptyDirectories: true
   defaultConfig: Debug
 
 configs:
