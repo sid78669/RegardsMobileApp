@@ -23,7 +23,7 @@ env:
 jobs:
   xcodegen-determinism:
     name: xcodegen determinism
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: maxim-lobanov/setup-xcode@v1
@@ -43,7 +43,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: xcodegen-determinism
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
 
   unit-tests:
     name: Unit tests + coverage
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
 
   accessibility-audit:
     name: Accessibility audit
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +125,7 @@ jobs:
   # job kept here so branch protection can reference it by name from day 1.
   snapshot-tests:
     name: Snapshot tests (PR3+)
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: build
     if: false
     steps:
