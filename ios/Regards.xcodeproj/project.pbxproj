@@ -41,7 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		07DFCE9573BE0729618E8E9F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		07DFCE9573BE0729618E8E9F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		196DC04E6A284D9227CF2232 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		20802BC7F9889673640365A0 /* RegardsTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RegardsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		41BCF034E33E6A28F1BD26F0 /* RegardsUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RegardsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -49,7 +49,7 @@
 		576F4E6A2792FA1CDCE73454 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		69EB6DD57226247A5D29C88E /* PlaceholderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderTests.swift; sourceTree = "<group>"; };
 		C1BC2A26D336B3E47DFE6ED2 /* PlaceholderUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderUITests.swift; sourceTree = "<group>"; };
-		DB51A0DFF4F8458828403934 /* Regards.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Regards.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB51A0DFF4F8458828403934 /* Regards.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Regards.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1F69E8D289AB13128D0AD1B /* RegardsAccessibilityTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RegardsAccessibilityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1ADC20C0E7E4CE0DA30722D /* RegardsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegardsApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -269,6 +269,9 @@
 						ProvisioningStyle = Manual;
 						TestTargetID = 3A97EC98ED0F252EDE9DC348;
 					};
+					3A97EC98ED0F252EDE9DC348 = {
+						ProvisioningStyle = Manual;
+					};
 					6C7CBE37BC7EED9F9B367CC1 = {
 						ProvisioningStyle = Manual;
 						TestTargetID = 3A97EC98ED0F252EDE9DC348;
@@ -288,7 +291,7 @@
 			mainGroup = 1BCB43F9AE1FAB5FC3191C8E;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB" */,
+				DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 825211A5549B806C2334ED5E /* Products */;
@@ -425,20 +428,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = BKK9J7A67Y;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Regards/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Regards: Stay in Touch";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.regards;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.Regards;
 				PRODUCT_NAME = Regards;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -554,20 +552,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = BKK9J7A67Y;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Regards/Resources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Regards: Stay in Touch";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.regards;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.Regards;
 				PRODUCT_NAME = Regards;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -705,7 +698,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -718,7 +711,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		1A8E1B586940E1B4EED330AE /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = DA381AD319404333A486785A /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
