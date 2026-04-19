@@ -1,0 +1,62 @@
+# Regards — iOS
+
+Native iOS app built against ARCHITECTURE.md §6 (Swift 6 / SwiftUI / GRDB,
+iOS 17+). Source of truth for the Xcode project is [`project.yml`](project.yml);
+the `Regards.xcodeproj` is regenerated from it.
+
+## One-time setup
+
+```bash
+brew install xcodegen
+```
+
+You need Xcode 16 or newer. Swift 6 strict concurrency is on by default.
+
+## Regenerate the Xcode project
+
+Any time `project.yml` changes:
+
+```bash
+cd ios
+xcodegen generate
+```
+
+Commit both `project.yml` and the regenerated `Regards.xcodeproj/`.
+
+CI runs `xcodegen generate && git diff --exit-code` on every push — if the
+committed xcodeproj drifts from `project.yml`, the build fails.
+
+## Build + test
+
+```bash
+cd ios
+xcodebuild \
+  -project Regards.xcodeproj \
+  -scheme Regards \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  build
+
+xcodebuild \
+  -project Regards.xcodeproj \
+  -scheme Regards \
+  -destination 'platform=iOS Simulator,name=iPhone 15' \
+  test
+```
+
+The `test` action runs:
+
+- **`RegardsTests`** — `swift-testing` unit suite. Domain-layer tests land here
+  in PR2 (§13: Domain layer at 100% coverage).
+- **`RegardsAccessibilityTests`** — XCUITest suite that launches the app and
+  calls `XCUIApplication.performAccessibilityAudit()`. A failing audit blocks
+  merge. See [`docs/accessibility.md`](docs/accessibility.md) for the standing
+  rules.
+
+`RegardsUITests` is a separate target for general UI automation and is not
+wired into the default test plan yet.
+
+## Phase plan
+
+This app ships in three phases per ARCHITECTURE.md §14. PR1 (this scaffold)
+gets the project to green. PR2 lands domain + data. PR3 lands the eight-screen
+SwiftUI shell.

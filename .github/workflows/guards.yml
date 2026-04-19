@@ -1,0 +1,56 @@
+name: Guards
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: guards-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  privacy-grep:
+    name: No networking code (§11)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan Regards/ for URLSession / Network.framework
+        run: |
+          if grep -RE "URLSession|Network\.framework|NWConnection|\bNWEndpoint\b" ios/Regards 2>/dev/null; then
+            echo "::error::Networking symbols found in ios/Regards. The app must not make network calls (§11). Move StoreKit-only code to ios/Regards/Platform/Billing if needed."
+            exit 1
+          fi
+          echo "No networking code found. 👍"
+
+  domain-purity-grep:
+    name: Domain layer is platform-free (§5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan ios/Regards/Domain for platform imports
+        run: |
+          if [ -d ios/Regards/Domain ] && grep -RE "^import (UIKit|SwiftUI|Contacts|EventKit|UserNotifications|GRDB|StoreKit)$" ios/Regards/Domain 2>/dev/null; then
+            echo "::error::Domain layer must be pure Swift — no Apple frameworks, no GRDB. Move platform-dependent code to Regards/Platform or Regards/Data."
+            exit 1
+          fi
+          echo "Domain layer is clean. 👍"
+
+  yaml-lint:
+    name: project.yml syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate project.yml is parseable YAML
+        run: python3 -c "import yaml,sys; yaml.safe_load(open('ios/project.yml'))"
+
+  markdown-links:
+    name: Markdown link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: .github/markdown-link-check.json
+          folder-path: "ios/docs"
+          file-extension: ".md"

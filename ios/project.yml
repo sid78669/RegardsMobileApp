@@ -1,0 +1,160 @@
+name: Regards
+
+options:
+  bundleIdPrefix: com.regardsapp
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: en
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  defaultConfig: Debug
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: "YES"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: "YES"
+    GCC_WARN_ABOUT_MISSING_NEWLINE: "YES"
+    CLANG_WARN_DOCUMENTATION_COMMENTS: "YES"
+    # Simulator-only builds don't need a signing identity. CI and local sim boots
+    # both use this; TestFlight signing is configured in the release workflow in
+    # Phase 3, not here.
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGN_STYLE: Manual
+  configs:
+    Debug:
+      SWIFT_TREAT_WARNINGS_AS_ERRORS: "YES"
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      ENABLE_TESTABILITY: "YES"
+    Release:
+      SWIFT_TREAT_WARNINGS_AS_ERRORS: "YES"
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: "6.29.0"
+
+targets:
+  Regards:
+    type: application
+    platform: iOS
+    sources:
+      - path: Regards
+        excludes:
+          - "**/.DS_Store"
+      - path: Regards/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    resources:
+      - Regards/Resources/Assets.xcassets
+    info:
+      path: Regards/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Regards
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # §11 — Technical anti-call-home guarantees (iOS).
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+          NSAllowsArbitraryLoadsInWebContent: false
+          NSAllowsLocalNetworking: false
+        # Populated in Phase 1 when deep links go live (§8).
+        LSApplicationQueriesSchemes: []
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.Regards
+        PRODUCT_NAME: Regards
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - package: GRDB
+
+  RegardsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: RegardsTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsTests
+        GENERATE_INFOPLIST_FILE: "YES"
+    dependencies:
+      - target: Regards
+
+  RegardsUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RegardsUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsUITests
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_TARGET_NAME: Regards
+    dependencies:
+      - target: Regards
+
+  RegardsAccessibilityTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RegardsAccessibilityTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsAccessibilityTests
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_TARGET_NAME: Regards
+    dependencies:
+      - target: Regards
+
+schemes:
+  Regards:
+    build:
+      targets:
+        Regards: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      parallelizable: true
+      coverageEnabled: true
+      targets:
+        - RegardsTests
+        - RegardsAccessibilityTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  RegardsAccessibilityTests:
+    build:
+      targets:
+        RegardsAccessibilityTests: all
+    test:
+      config: Debug
+      targets:
+        - RegardsAccessibilityTests

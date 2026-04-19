@@ -1,7 +1,7 @@
 # Regards — Architectural Design Document
 
-**Status:** Draft v0.4 (source-available license + build-journal plan)
-**Last updated:** 2026-04-15
+**Status:** Draft v0.5 (talking-points / conversation-queue feature added to V2 candidates)
+**Last updated:** 2026-04-19
 **Audience:** Claude Code implementation agent + human reviewers
 **Scope:** Native iOS (Swift / SwiftUI) + Native Android (Kotlin / Jetpack Compose) mobile app. Local-first. No backend. No passive messaging integrations.
 
@@ -680,6 +680,7 @@ The app ships on **iOS first, Android second**. Rationale: Apple's review cycle 
 - Why September: gives users 6–8 weeks of lead time before peak Shutterfly ordering season (early-to-mid November), and gives us a clean "feature shipped for the holidays" Substack post in early October. Also avoids the November content traffic-jam from every other indie dev's holiday push.
 
 ### V2 candidates (explicitly not V1)
+- **Talking points / conversation queue.** A running list of things the user wants to bring up next time they talk to a specific contact (e.g., *"ask about her new job"*, *"share photo from the trip"*, *"follow up on his dad's surgery"*). Items can be added any time from Contact Detail, from a share-sheet action on another app ("remember to tell Priya about this article"), or via Siri/Google Assistant shortcut. When the reminder fires for that contact, the notification preview surfaces the count (*"3 things to bring up with Priya"*) and tapping it opens a talking-points list before deep-linking out to the chosen channel. After the interaction, the user can tick items off individually or bulk-clear with the "Caught up" action. Data model: new `TalkingPoint` table keyed by `contactId` (or `contactGroupId` when the contact is part of a virtual merge), with `body`, `createdAt`, `discussedAt?`, and `source` ('manual' | 'share_sheet' | 'siri'). Stored locally and encrypted at rest like the rest of the DB; private to Regards — never written to system Contacts. The **surface-at-reminder-time** behavior is the differentiator vs. competitors' static-notes implementations, and fits the app's "lower the friction to actually reaching out" thesis.
 - Email integration (Gmail + Outlook via OAuth, metadata-only).
 - Telegram integration via TDLib.
 - Android SMS + call log integration.
@@ -725,6 +726,7 @@ The app ships on **iOS first, Android second**. Rationale: Apple's review cycle 
 | 19 | V1 includes WidgetKit / Glance widget | 2026-04-15 | Moved up from V1.1 per user request. Small scope, no new permissions, reads via App Group shared container. Significant retention boost per indie-app pattern. |
 | 20 | iOS ships first; Android follows after iOS public launch | 2026-04-15 | Apple review cycle is longer and more variable; starting iOS gives earlier market feedback. Domain layer built for Swift becomes the validated reference for the Kotlin port. No KMP — we port, not share. |
 | 21 | Pricing is geo-tiered via Apple/Google auto-pricing, anchored on $4.99 US (Tier A) down to $0.99 (Tier D) | 2026-04-15 | Flat $4.99 globally prices out emerging markets where the privacy pitch resonates strongly (India, Brazil, Indonesia). PPP-adjusted tiers expand addressable market without adding operational cost (platforms handle the conversion). |
+| 22 | Talking points / conversation queue deferred to V2 | 2026-04-19 | Common feature in the category (Dex has "notes per contact", Monica has "things to remember", UpHabit pre-pivot had "talking points", Cloze surfaces notes with reminders). Meaningful value, but additive to the core reminder loop — V1 ships fine without it. Keep V1 scope tight; the Regards-specific twist worth preserving for V2 is surfacing the list *at reminder time*, which is rare in the category and reinforces the "lower friction to reaching out" thesis. |
 
 ## 17. How to use this document with Claude Code
 
