@@ -1,0 +1,65 @@
+included:
+  - ios/Regards
+  - ios/RegardsTests
+  - ios/RegardsUITests
+  - ios/RegardsAccessibilityTests
+
+excluded:
+  - ios/Regards.xcodeproj
+  - "**/.build"
+  - "**/DerivedData"
+
+disabled_rules:
+  - trailing_whitespace
+  - todo
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - closure_spacing
+  - contains_over_first_not_nil
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - overridden_super_call
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - toggle_bool
+  - unused_import
+  - unused_declaration
+  - yoda_condition
+
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 500
+  error: 800
+
+function_body_length:
+  warning: 60
+  error: 120
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded: [id, db, to, at, on, r, g, b]
+
+# Accessibility: flag interactive SwiftUI components that lack an
+# accessibilityLabel or visible text. This is a heuristic — it catches common
+# omissions without being exhaustive. UI tests pick up what lint misses.
+custom_rules:
+  button_requires_accessibility:
+    name: "Button needs accessibilityLabel or visible text"
+    regex: 'Button\s*\(\s*(?:action:\s*\{[^}]*\}\s*,\s*)?label:\s*\{\s*(?:Image|Spacer|EmptyView)\b'
+    message: "Buttons with only an Image/Spacer/EmptyView label must add .accessibilityLabel(...)."
+    severity: warning

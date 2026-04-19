@@ -1,0 +1,132 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-ci.yml"
+  pull_request:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-ci.yml"
+
+concurrency:
+  group: ios-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "16.2"
+  SIMULATOR: "platform=iOS Simulator,name=iPhone 15,OS=latest"
+  SCHEME: Regards
+
+jobs:
+  xcodegen-determinism:
+    name: xcodegen determinism
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Regenerate project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Assert committed xcodeproj matches project.yml
+        run: |
+          if ! git diff --exit-code ios/Regards.xcodeproj; then
+            echo "::error::Regards.xcodeproj is out of date. Run 'cd ios && xcodegen generate' and commit the result."
+            exit 1
+          fi
+
+  build:
+    name: Build
+    runs-on: macos-14
+    needs: xcodegen-determinism
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Build
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Regards.xcodeproj \
+            -scheme "$SCHEME" \
+            -destination "$SIMULATOR" \
+            -configuration Debug \
+            build \
+            | xcbeautify --renderer github-actions || true
+
+  unit-tests:
+    name: Unit tests + coverage
+    runs-on: macos-14
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Run RegardsTests
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Regards.xcodeproj \
+            -scheme "$SCHEME" \
+            -destination "$SIMULATOR" \
+            -configuration Debug \
+            -only-testing:RegardsTests \
+            -resultBundlePath build/RegardsTests.xcresult \
+            -enableCodeCoverage YES \
+            test \
+            | xcbeautify --renderer github-actions || true
+      - name: Upload xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RegardsTests.xcresult
+          path: ios/build/RegardsTests.xcresult
+
+  accessibility-audit:
+    name: Accessibility audit
+    runs-on: macos-14
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Run RegardsAccessibilityTests
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Regards.xcodeproj \
+            -scheme "$SCHEME" \
+            -destination "$SIMULATOR" \
+            -configuration Debug \
+            -only-testing:RegardsAccessibilityTests \
+            -resultBundlePath build/RegardsAccessibilityTests.xcresult \
+            test \
+            | xcbeautify --renderer github-actions || true
+      - name: Upload xcresult
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: RegardsAccessibilityTests.xcresult
+          path: ios/build/RegardsAccessibilityTests.xcresult
+
+  # PR3 wires in snapshot tests once swift-snapshot-testing lands. Placeholder
+  # job kept here so branch protection can reference it by name from day 1.
+  snapshot-tests:
+    name: Snapshot tests (PR3+)
+    runs-on: macos-14
+    needs: build
+    if: false
+    steps:
+      - run: echo "Populated in PR3"
