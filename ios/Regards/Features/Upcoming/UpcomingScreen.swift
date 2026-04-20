@@ -137,7 +137,9 @@ struct UpcomingRow: View {
     }
 
     private var accessibilityLabel: String {
-        let base = "\(row.name), \(row.kind == .cadence ? (row.cadenceText ?? "") : String(describing: row.kind)) at \(row.timeOfDayText)"
-        return base
+        let what = row.kind == .cadence
+            ? (row.cadenceText ?? "")
+            : String(describing: row.kind)
+        return "\(row.name), \(what) at \(row.timeOfDayText)"
     }
 }

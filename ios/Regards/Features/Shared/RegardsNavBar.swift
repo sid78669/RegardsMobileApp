@@ -30,7 +30,9 @@ public struct RegardsNavBar: View {
                 }
                 Spacer()
                 if let rightAction {
-                    Button(action: { rightAction.handler?() }) {
+                    Button {
+                        rightAction.handler?()
+                    } label: {
                         Text(rightAction.text)
                             .font(.body)
                             .foregroundStyle(RegardsDS.accent)
@@ -81,7 +83,9 @@ public struct RegardsSegmentedControl<Tab: Hashable>: View {
     public var body: some View {
         HStack(spacing: 2) {
             ForEach(options) { opt in
-                Button(action: { selection = opt.id }) {
+                Button {
+                    selection = opt.id
+                } label: {
                     HStack(spacing: 6) {
                         Text(opt.label)
                             .font(.subheadline.weight(selection == opt.id ? .semibold : .medium))

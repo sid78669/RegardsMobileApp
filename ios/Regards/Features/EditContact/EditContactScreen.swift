@@ -74,7 +74,8 @@ public struct EditContactScreen: View {
                 .foregroundStyle(RegardsDS.accentInk.opacity(0.8))
                 .padding(.top, 2)
             Text(
-                "Saved changes write back to your device Contacts — only the fields you touch. Never deletes, never merges."
+                "Saved changes write back to your device Contacts — only the fields you touch. "
+                + "Never deletes, never merges."
             )
             .font(.footnote)
             .foregroundStyle(RegardsDS.accentInk)

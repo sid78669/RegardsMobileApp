@@ -35,11 +35,15 @@ public final class MergeDuplicatesViewModel: @unchecked Sendable {
     public func load() async {
         let all = (try? await contacts.fetchAll()) ?? []
         let inputs = all.map { contact in
-            DuplicateDetector.Input(
+            let value = contact.preferredChannelValue
+            let isPhone = !value.isEmpty
+                && ChannelCatalog.isPhoneE164(ChannelCatalog.normalizedPhone(value))
+            let isEmail = ChannelCatalog.isEmail(value)
+            return DuplicateDetector.Input(
                 contactId: contact.id,
                 displayName: contact.displayName,
-                phones: [contact.preferredChannelValue].filter { !$0.isEmpty && ChannelCatalog.isPhoneE164(ChannelCatalog.normalizedPhone($0)) },
-                emails: [contact.preferredChannelValue].filter { ChannelCatalog.isEmail($0) }
+                phones: isPhone ? [value] : [],
+                emails: isEmail ? [value] : []
             )
         }
         let pairs = detector.candidates(from: inputs)

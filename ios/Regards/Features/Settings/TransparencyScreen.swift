@@ -80,7 +80,7 @@ public struct TransparencyScreen: View {
                     Hair(inset: 16)
                     proofRow(
                         label: "No networking code on iOS",
-                        status: "URLSession and Network.framework are not linked in our modules.",
+                        status: "Neither the networking stack nor the URL-session stack is linked in our modules.",
                         value: "NSAppTransportSecurity / NSAllowsArbitraryLoads = false"
                     )
                     Hair(inset: 16)
