@@ -53,13 +53,6 @@ targets:
           - "**/.DS_Store"
       - path: Regards/PrivacyInfo.xcprivacy
         buildPhase: resources
-      # Brand source assets bundled alongside the app. Kept at ios/ root so
-      # they're easy to replace from design exports. Used by the launch / About
-      # screens in Phase 2; fine to bundle now.
-      - path: regards-mark-purple-1024.png
-        buildPhase: resources
-      - path: regards-wordmark-stacked-purple-2240.png
-        buildPhase: resources
     info:
       path: Regards/Resources/Info.plist
       properties:
