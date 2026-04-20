@@ -12,8 +12,13 @@ struct DatabaseMigratorTests {
     func v1Tables() async throws {
         let db = try DatabaseFactory.makeInMemoryDatabase()
         let tables = try await db.read { db -> Set<String> in
-            let names = try String.fetchAll(db,
-                sql: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'grdb_%'")
+            let sql = """
+                SELECT name FROM sqlite_master
+                WHERE type = 'table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name NOT LIKE 'grdb_%'
+                """
+            let names = try String.fetchAll(db, sql: sql)
             return Set(names)
         }
         let expected: Set<String> = [

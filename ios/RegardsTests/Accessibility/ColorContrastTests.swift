@@ -37,4 +37,3 @@ struct ColorContrastTests {
         #expect(ratio >= 4.5, "muted-on-bg = \(ratio)")
     }
 }
-

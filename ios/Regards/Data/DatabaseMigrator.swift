@@ -109,9 +109,12 @@ public enum RegardsSchema {
 
         // Default UserProfile.
         let profile = UserProfile()
+        let tier = profile.entitlementTier.rawValue
+        let refreshedAt = Int(profile.entitlementRefreshedAt.timeIntervalSince1970)
         try db.execute(literal: """
-            INSERT INTO UserProfile (id, onboardingCompletedAt, entitlementTier, entitlementRefreshedAt)
-            VALUES (1, NULL, \(profile.entitlementTier.rawValue), \(Int(profile.entitlementRefreshedAt.timeIntervalSince1970)))
+            INSERT INTO UserProfile
+                (id, onboardingCompletedAt, entitlementTier, entitlementRefreshedAt)
+            VALUES (1, NULL, \(tier), \(refreshedAt))
             """)
     }
 }

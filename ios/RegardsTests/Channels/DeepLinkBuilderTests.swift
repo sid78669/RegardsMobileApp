@@ -34,8 +34,10 @@ struct DeepLinkBuilderTests {
     @Test("Every catalog entry produces the expected URL", arguments: cases)
     func catalogRow(tc: DeepLinkCase) {
         let url = DeepLinkBuilder.build(channel: tc.channel, value: tc.input)
+        let got = url?.absoluteString ?? "nil"
+        let want = tc.expected ?? "nil"
         #expect(url?.absoluteString == tc.expected,
-                "\(tc.channel.rawValue) with \(tc.input) expected \(tc.expected ?? "nil") got \(url?.absoluteString ?? "nil")")
+                "\(tc.channel.rawValue) with \(tc.input): expected \(want), got \(got)")
     }
 
     @Test("Invalid input returns nil for strictly-validated channels")
