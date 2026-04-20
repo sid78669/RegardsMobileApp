@@ -23,15 +23,9 @@ public struct MonthDay: Sendable, Equatable, Hashable {
     public let month: Int
     public let day: Int
 
-    /// Upper bound per month. Feb is 29 to allow the leap-year birthday case
-    /// (`ReminderEngine.resolveFeb29Fallback` handles the non-leap rollover).
-    private static let daysPerMonth: [Int] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
     public init(month: Int, day: Int) {
-        precondition((1...12).contains(month), "month must be 1…12 — got \(month)")
-        let maxDay = Self.daysPerMonth[month - 1]
-        precondition((1...maxDay).contains(day),
-                     "day \(day) is not valid for month \(month) (max \(maxDay))")
+        precondition(Self.isValid(month: month, day: day),
+                     "\(month)-\(day) is not a valid month-day combination")
         self.month = month
         self.day = day
     }
@@ -40,10 +34,28 @@ public struct MonthDay: Sendable, Equatable, Hashable {
     /// of trapping. Preferred entry point for any caller parsing untrusted
     /// input (e.g. deserialized from system Contacts or user form fields).
     public static func make(month: Int, day: Int) -> MonthDay? {
-        guard (1...12).contains(month) else { return nil }
-        let maxDay = daysPerMonth[month - 1]
-        guard (1...maxDay).contains(day) else { return nil }
+        guard isValid(month: month, day: day) else { return nil }
         return MonthDay(month: month, day: day)
+    }
+
+    /// Validate by round-tripping `(month, day)` through a Gregorian calendar
+    /// anchored in a leap year (so Feb 29 passes). If Calendar has to roll the
+    /// components forward — e.g. Nov 31 → Dec 1, Feb 30 → Mar 2, month 13 →
+    /// year + 1 — the normalized components won't match the input and we
+    /// reject. Delegates "which days exist in each month" to Foundation so
+    /// the check stays correct if Foundation's calendar arithmetic ever
+    /// changes (it won't, but the delegation is cleaner than a hand-rolled
+    /// table).
+    private static func isValid(month: Int, day: Int) -> Bool {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        var components = DateComponents()
+        components.year = 2024   // leap year — validates Feb 29 alongside the rest
+        components.month = month
+        components.day = day
+        guard let date = calendar.date(from: components) else { return false }
+        let normalized = calendar.dateComponents([.month, .day], from: date)
+        return normalized.month == month && normalized.day == day
     }
 
     /// ISO "MM-DD" used as `ScheduledReminder.occasionDate`.
