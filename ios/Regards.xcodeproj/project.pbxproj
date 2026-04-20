@@ -31,11 +31,13 @@
 		A708FFAF946E893F9E9A686D /* Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C65FC7F190CCD94311E1CA /* Records.swift */; };
 		AE4E36D73752AD75BD1E9977 /* DeepLinkBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A97580E9E3BB127C387066 /* DeepLinkBuilder.swift */; };
 		B06524BDAE16D83E8643837E /* LaunchAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 479B4EFD6960B8E62D8635BE /* LaunchAccessibilityTests.swift */; };
+		BB535BBD1E8EAAB6CCDBF74B /* regards-wordmark-stacked-purple-2240.png in Resources */ = {isa = PBXBuildFile; fileRef = 50AD718D346788ACCBCCCE1A /* regards-wordmark-stacked-purple-2240.png */; };
 		BE5D02DD089ECCAD940257DA /* ColorContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046C9467DCBC3F837F1538AA /* ColorContrastTests.swift */; };
 		C17E9AC4724CF5518EDC0353 /* MockRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A61EE486988C12FCD099BEB /* MockRepositories.swift */; };
 		CB1192EDCAC1990240969487 /* DatabaseMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8660B33741B4961FAB6E2884 /* DatabaseMigrator.swift */; };
 		CB6DFAAA9FE0A26F371A6E87 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4B5E6620099016E635E9FB5 /* Contact.swift */; };
 		CD76FBEDEEF35BB28E43303D /* ChannelCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A814573BE991E0A35C84653E /* ChannelCatalog.swift */; };
+		DDE4469D1BB214925967871C /* regards-mark-purple-1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 1AED77CF4B31A740FD75C00A /* regards-mark-purple-1024.png */; };
 		E4B0A7C5A1EA4F5FDAB6B011 /* RegardsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ADC20C0E7E4CE0DA30722D /* RegardsApp.swift */; };
 		EFA9DAB6C0C427FB91D046B7 /* ReminderEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F26043F1ADA839A3F73450 /* ReminderEngine.swift */; };
 		F08DC8DBB741CDA9F6B23530 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FDCEF0842E2124C5BA6158C /* UserProfile.swift */; };
@@ -76,6 +78,7 @@
 		0F801281CA1EC0111165A9B8 /* DatabaseMigratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseMigratorTests.swift; sourceTree = "<group>"; };
 		16738B3353782A7FC97B0A67 /* DatabaseFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseFactory.swift; sourceTree = "<group>"; };
 		196DC04E6A284D9227CF2232 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1AED77CF4B31A740FD75C00A /* regards-mark-purple-1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "regards-mark-purple-1024.png"; sourceTree = "<group>"; };
 		20802BC7F9889673640365A0 /* RegardsTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RegardsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CDAA3F4C29BD47652C28A2B /* InteractionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionLog.swift; sourceTree = "<group>"; };
 		2FDCEF0842E2124C5BA6158C /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
@@ -86,6 +89,7 @@
 		479B4EFD6960B8E62D8635BE /* LaunchAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAccessibilityTests.swift; sourceTree = "<group>"; };
 		4A61EE486988C12FCD099BEB /* MockRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockRepositories.swift; sourceTree = "<group>"; };
 		4E56E8D68511FF7E66764BF0 /* AnnualRecurrenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnualRecurrenceTests.swift; sourceTree = "<group>"; };
+		50AD718D346788ACCBCCCE1A /* regards-wordmark-stacked-purple-2240.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "regards-wordmark-stacked-purple-2240.png"; sourceTree = "<group>"; };
 		54C08F1EDF2F2D7AA655AB07 /* ReminderWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderWindow.swift; sourceTree = "<group>"; };
 		576F4E6A2792FA1CDCE73454 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6503B3BB978A8B62DEF9F730 /* Repositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repositories.swift; sourceTree = "<group>"; };
@@ -155,6 +159,8 @@
 				55F1FCE831F482BAA7480203 /* RegardsAccessibilityTests */,
 				443A7986B828BE01D00DE648 /* RegardsTests */,
 				D7729008208DCCD41B9E616C /* RegardsUITests */,
+				1AED77CF4B31A740FD75C00A /* regards-mark-purple-1024.png */,
+				50AD718D346788ACCBCCCE1A /* regards-wordmark-stacked-purple-2240.png */,
 				825211A5549B806C2334ED5E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -386,7 +392,8 @@
 						TestTargetID = 3A97EC98ED0F252EDE9DC348;
 					};
 					3A97EC98ED0F252EDE9DC348 = {
-						ProvisioningStyle = Manual;
+						DevelopmentTeam = BKK9J7A67Y;
+						ProvisioningStyle = Automatic;
 					};
 					6C7CBE37BC7EED9F9B367CC1 = {
 						ProvisioningStyle = Manual;
@@ -429,6 +436,8 @@
 			files = (
 				0815A1A47A5CC93B518AF1DC /* Assets.xcassets in Resources */,
 				89E654766C446D32758871CD /* PrivacyInfo.xcprivacy in Resources */,
+				DDE4469D1BB214925967871C /* regards-mark-purple-1024.png in Resources */,
+				BB535BBD1E8EAAB6CCDBF74B /* regards-wordmark-stacked-purple-2240.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -526,7 +535,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsAccessibilityTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsAccessibilityTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Regards;
@@ -543,7 +552,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsAccessibilityTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsAccessibilityTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Regards;
@@ -560,7 +569,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Regards.app/Regards";
@@ -572,15 +581,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BKK9J7A67Y;
 				INFOPLIST_FILE = Regards/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Regards;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.Regards;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.regards;
 				PRODUCT_NAME = Regards;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -596,7 +611,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsUITests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Regards;
@@ -684,7 +699,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Regards.app/Regards";
@@ -696,15 +711,21 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BKK9J7A67Y;
 				INFOPLIST_FILE = Regards/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Regards;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.Regards;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.regards;
 				PRODUCT_NAME = Regards;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -720,7 +741,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.regardsapp.RegardsUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sdahiya.RegardsUITests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Regards;
