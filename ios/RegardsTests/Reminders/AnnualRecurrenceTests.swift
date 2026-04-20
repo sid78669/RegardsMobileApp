@@ -95,4 +95,36 @@ struct AnnualRecurrenceTests {
         #expect(MonthDay.from(isoString: "13-01") == nil)
         #expect(MonthDay.from(isoString: "not-a-date") == nil)
     }
+
+    @Test("MonthDay.make rejects day-of-month values impossible for the given month")
+    func monthDayRejectsInvalidCombinations() {
+        // 30-day months have no 31st.
+        #expect(MonthDay.make(month: 4,  day: 31) == nil) // April
+        #expect(MonthDay.make(month: 6,  day: 31) == nil) // June
+        #expect(MonthDay.make(month: 9,  day: 31) == nil) // September
+        #expect(MonthDay.make(month: 11, day: 31) == nil) // November — review comment
+
+        // February has no 30th or 31st; 29 is allowed (leap-year fallback).
+        #expect(MonthDay.make(month: 2, day: 30) == nil)
+        #expect(MonthDay.make(month: 2, day: 31) == nil)
+        #expect(MonthDay.make(month: 2, day: 29) != nil)
+
+        // End-of-month boundaries for the 31-day months.
+        #expect(MonthDay.make(month: 1,  day: 31) != nil)
+        #expect(MonthDay.make(month: 12, day: 31) != nil)
+
+        // Out-of-range guards.
+        #expect(MonthDay.make(month: 0,  day: 1)  == nil)
+        #expect(MonthDay.make(month: 13, day: 1)  == nil)
+        #expect(MonthDay.make(month: 1,  day: 0)  == nil)
+        #expect(MonthDay.make(month: 1,  day: -1) == nil)
+    }
+
+    @Test("ISO parser rejects impossible day-month combinations too")
+    func isoStringRejectsInvalidCombinations() {
+        #expect(MonthDay.from(isoString: "11-31") == nil) // Nov 31
+        #expect(MonthDay.from(isoString: "02-30") == nil) // Feb 30
+        #expect(MonthDay.from(isoString: "04-31") == nil) // Apr 31
+        #expect(MonthDay.from(isoString: "02-29") != nil) // Feb 29 still allowed
+    }
 }

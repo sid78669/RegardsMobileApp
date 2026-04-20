@@ -23,11 +23,27 @@ public struct MonthDay: Sendable, Equatable, Hashable {
     public let month: Int
     public let day: Int
 
+    /// Upper bound per month. Feb is 29 to allow the leap-year birthday case
+    /// (`ReminderEngine.resolveFeb29Fallback` handles the non-leap rollover).
+    private static let daysPerMonth: [Int] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+
     public init(month: Int, day: Int) {
-        precondition((1...12).contains(month), "month must be 1…12")
-        precondition((1...31).contains(day),   "day must be 1…31")
+        precondition((1...12).contains(month), "month must be 1…12 — got \(month)")
+        let maxDay = Self.daysPerMonth[month - 1]
+        precondition((1...maxDay).contains(day),
+                     "day \(day) is not valid for month \(month) (max \(maxDay))")
         self.month = month
         self.day = day
+    }
+
+    /// Failable equivalent of `init` — returns nil on invalid combos instead
+    /// of trapping. Preferred entry point for any caller parsing untrusted
+    /// input (e.g. deserialized from system Contacts or user form fields).
+    public static func make(month: Int, day: Int) -> MonthDay? {
+        guard (1...12).contains(month) else { return nil }
+        let maxDay = daysPerMonth[month - 1]
+        guard (1...maxDay).contains(day) else { return nil }
+        return MonthDay(month: month, day: day)
     }
 
     /// ISO "MM-DD" used as `ScheduledReminder.occasionDate`.
@@ -38,9 +54,8 @@ public struct MonthDay: Sendable, Equatable, Hashable {
     public static func from(isoString: String) -> MonthDay? {
         let parts = isoString.split(separator: "-")
         guard parts.count == 2,
-              let m = Int(parts[0]), let d = Int(parts[1]),
-              (1...12).contains(m), (1...31).contains(d) else { return nil }
-        return MonthDay(month: m, day: d)
+              let m = Int(parts[0]), let d = Int(parts[1]) else { return nil }
+        return make(month: m, day: d)
     }
 }
 
@@ -127,23 +142,22 @@ public struct ReminderEngine: Sendable {
         }
 
         // Walk at most 8 days forward (guarantees we land on the next
-        // occurrence of every weekday). In-loop we inspect today first, then
-        // each following day.
+        // occurrence of every weekday). We inspect today first, then each
+        // following day.
         var cursor = date
         for dayOffset in 0..<8 {
-            let candidateDay: Date = dayOffset == 0
-                ? cursor
-                : calendar.date(byAdding: .day, value: 1, to: cursor)!
-            cursor = candidateDay
+            if dayOffset > 0 {
+                cursor = calendar.date(byAdding: .day, value: 1, to: cursor)!
+            }
 
-            let weekday = calendar.component(.weekday, from: candidateDay)
+            let weekday = calendar.component(.weekday, from: cursor)
             guard window.allowedDays.contains(calendarWeekday: weekday) else { continue }
 
             // Figure out the wall-clock time on this day.
-            let startOfDay = calendar.startOfDay(for: candidateDay)
+            let startOfDay = calendar.startOfDay(for: cursor)
             let timeOfDay: TimeOfDay
             if dayOffset == 0 {
-                let comps = calendar.dateComponents([.hour, .minute], from: candidateDay)
+                let comps = calendar.dateComponents([.hour, .minute], from: cursor)
                 timeOfDay = TimeOfDay(hour: comps.hour ?? 0, minute: comps.minute ?? 0)
             } else {
                 timeOfDay = TimeOfDay.midnight
