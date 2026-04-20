@@ -1,0 +1,86 @@
+import Foundation
+import Observation
+
+public struct DuplicateCandidateState: Sendable, Identifiable, Equatable {
+    public struct Member: Sendable, Equatable {
+        public let contactId: UUID
+        public let displayName: String
+        public let phone: String?
+        public let email: String?
+    }
+
+    public var id: String {
+        "\(a.contactId.uuidString)|\(b.contactId.uuidString)"
+    }
+    public let a: Member
+    public let b: Member
+    public let confidence: DuplicateCandidate.Confidence
+    public let rationale: String
+    public var primaryIsA: Bool
+    public var isSelected: Bool
+}
+
+@Observable
+public final class MergeDuplicatesViewModel: @unchecked Sendable {
+
+    public private(set) var candidates: [DuplicateCandidateState] = []
+
+    private let contacts: any ContactRepository
+    private let detector = DuplicateDetector()
+
+    public init(contacts: any ContactRepository) {
+        self.contacts = contacts
+    }
+
+    public func load() async {
+        let all = (try? await contacts.fetchAll()) ?? []
+        let inputs = all.map { contact in
+            DuplicateDetector.Input(
+                contactId: contact.id,
+                displayName: contact.displayName,
+                phones: [contact.preferredChannelValue].filter { !$0.isEmpty && ChannelCatalog.isPhoneE164(ChannelCatalog.normalizedPhone($0)) },
+                emails: [contact.preferredChannelValue].filter { ChannelCatalog.isEmail($0) }
+            )
+        }
+        let pairs = detector.candidates(from: inputs)
+        let byId = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
+
+        candidates = pairs.compactMap { pair -> DuplicateCandidateState? in
+            guard let contactA = byId[pair.contactA], let contactB = byId[pair.contactB] else { return nil }
+            return DuplicateCandidateState(
+                a: Self.member(from: contactA),
+                b: Self.member(from: contactB),
+                confidence: pair.confidence,
+                rationale: pair.rationale,
+                primaryIsA: true,
+                isSelected: pair.confidence == .high
+            )
+        }
+    }
+
+    public func toggleSelection(for id: String) {
+        guard let idx = candidates.firstIndex(where: { $0.id == id }) else { return }
+        candidates[idx].isSelected.toggle()
+    }
+
+    public func setPrimary(for id: String, isA: Bool) {
+        guard let idx = candidates.firstIndex(where: { $0.id == id }) else { return }
+        candidates[idx].primaryIsA = isA
+    }
+
+    static func member(from contact: Contact) -> DuplicateCandidateState.Member {
+        var phone: String?
+        var email: String?
+        let value = contact.preferredChannelValue
+        if !value.isEmpty {
+            if ChannelCatalog.isEmail(value) { email = value }
+            else { phone = value }
+        }
+        return DuplicateCandidateState.Member(
+            contactId: contact.id,
+            displayName: contact.displayName,
+            phone: phone,
+            email: email
+        )
+    }
+}

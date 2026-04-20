@@ -2,68 +2,135 @@ import SwiftUI
 
 @main
 struct RegardsApp: App {
+    // Phase 0 runs against MockRepositories. Phase 1 swaps in GRDBRepositories
+    // here without touching any view code.
+    private let env = AppEnvironment.makeMock()
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(env: env)
         }
     }
 }
 
-/// The first SwiftUI view the user sees. Sits on top of iOS's system launch
-/// screen (which is just the background color — see `UILaunchScreen` in the
-/// Info.plist) and paints the brand + copyright while later phases' content
-/// is warming up. In Phase 0 it's the whole app; PR3 replaces the body with
-/// the real tab root once the shell lands.
+/// The first SwiftUI view the user sees. Shows the splash for a brief brand
+/// moment, then crossfades into the real tab root once `.task` fires.
 struct RootView: View {
+    let env: AppEnvironment
+    @State private var isReady = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        ZStack {
+            if isReady {
+                RegardsTabRoot(env: env)
+                    .transition(.opacity)
+            } else {
+                SplashView()
+                    .transition(.opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.35), value: isReady)
+        .task {
+            // Give the splash a single beat before cutting to content —
+            // enough to feel intentional, short enough not to feel slow.
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            isReady = true
+        }
+    }
+}
+
+/// Splash shown during the app's first render pass. Phase 1 will drive the
+/// transition off actual loading completion; Phase 0 just waits briefly.
+struct SplashView: View {
     @ScaledMetric(relativeTo: .largeTitle) private var wordmarkWidth: CGFloat = 240
 
     var body: some View {
         ZStack {
-            Color("Background").ignoresSafeArea()
+            RegardsDS.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
-
-                // Brand wordmark — decorative; the whole screen's
-                // accessibility element describes it below so VoiceOver
-                // doesn't read the image + a separate "Regards" label twice.
                 Image("LaunchWordmark")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: wordmarkWidth)
                     .accessibilityHidden(true)
-
-                Text("Phase 0 scaffold")
-                    .font(.footnote)
-                    .foregroundStyle(Color("Muted"))
-                    .padding(.top, 12)
-                    .accessibilityHidden(true)
-
                 Spacer()
-
-                disclaimer
-                    .padding(.horizontal, 24)
+                Text("© 2026 Sid Dahiya")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(RegardsDS.muted)
                     .padding(.bottom, 24)
                     .accessibilityHidden(true)
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Regards. Phase 0 scaffold. Copyright 2026 Sid Dahiya.")
+        .accessibilityLabel("Regards. Loading.")
         .accessibilityAddTraits(.isHeader)
         .accessibilityIdentifier("launch.root")
     }
+}
 
-    /// Quiet footer under the wordmark — the architecture doc's tone: literal,
-    /// reassuring, no marketing. Single-line copyright keeps the splash
-    /// distraction-free.
-    private var disclaimer: some View {
-        Text("© 2026 Sid Dahiya")
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(Color("Muted"))
-            .multilineTextAlignment(.center)
+/// The tab-bar root. Every feature screen reaches users through one of the
+/// four tabs. Each tab wraps its content in a `NavigationStack` so pushes
+/// (Contact Detail, Edit, Transparency, …) stay local to the tab.
+struct RegardsTabRoot: View {
+    let env: AppEnvironment
+    @State private var selected: Tab = .overdue
+    @State private var overdueVM: OverdueViewModel
+    @State private var upcomingVM: UpcomingViewModel
+
+    enum Tab: Hashable { case overdue, upcoming, contacts, settings }
+
+    init(env: AppEnvironment) {
+        self.env = env
+        self._overdueVM = State(initialValue: OverdueViewModel(contacts: env.contacts))
+        self._upcomingVM = State(initialValue: UpcomingViewModel(contacts: env.contacts))
+    }
+
+    var body: some View {
+        TabView(selection: $selected) {
+            NavigationStack {
+                OverdueScreen(
+                    viewModel: overdueVM,
+                    upcomingCount: upcomingVM.totalCount,
+                    onTapContact: { _ in },
+                    onTapChannel: { _ in }
+                )
+            }
+            .tabItem { Label("Overdue", systemImage: "exclamationmark.circle") }
+            .tag(Tab.overdue)
+
+            NavigationStack {
+                UpcomingScreen(
+                    viewModel: upcomingVM,
+                    overdueCount: overdueVM.overdueCount,
+                    onSwitchToOverdue: { selected = .overdue }
+                )
+            }
+            .tabItem { Label("Upcoming", systemImage: "calendar") }
+            .tag(Tab.upcoming)
+
+            NavigationStack {
+                AllContactsScreen(env: env)
+            }
+            .tabItem { Label("Contacts", systemImage: "person.2") }
+            .tag(Tab.contacts)
+
+            NavigationStack {
+                SettingsScreen(env: env)
+            }
+            .tabItem { Label("Settings", systemImage: "gearshape") }
+            .tag(Tab.settings)
+        }
+        .tint(RegardsDS.accent)
     }
 }
 
-#Preview {
-    RootView()
+#Preview("Splash") {
+    SplashView()
+}
+
+#Preview("Tab root") {
+    RegardsTabRoot(env: AppEnvironment.makeMock())
 }

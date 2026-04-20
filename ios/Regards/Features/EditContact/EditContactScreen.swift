@@ -1,0 +1,210 @@
+import SwiftUI
+
+public struct EditContactScreen: View {
+    let contact: Contact
+    let onCancel: () -> Void
+    let onSave: () -> Void
+
+    public init(contact: Contact,
+                onCancel: @escaping () -> Void = {},
+                onSave: @escaping () -> Void = {}) {
+        self.contact = contact
+        self.onCancel = onCancel
+        self.onSave = onSave
+    }
+
+    public var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                header
+                heroAvatar
+                consentBanner
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                nameSection
+                phoneSection
+                emailSection
+                postalSection
+                datesSection
+                notesSection
+
+                Color.clear.frame(height: 40)
+            }
+        }
+        .background(RegardsDS.background.ignoresSafeArea())
+        .scrollContentBackground(.hidden)
+        .navigationBarBackButtonHidden(true)
+        .accessibilityIdentifier("screen.edit-contact")
+    }
+
+    private var header: some View {
+        HStack {
+            Button("Cancel", action: onCancel)
+                .foregroundStyle(RegardsDS.accent)
+            Spacer()
+            Text("Edit Contact")
+                .font(.headline)
+                .foregroundStyle(RegardsDS.ink)
+                .accessibilityAddTraits(.isHeader)
+            Spacer()
+            Button("Save", action: onSave)
+                .foregroundStyle(RegardsDS.accent)
+                .font(.body.weight(.semibold))
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+    }
+
+    private var heroAvatar: some View {
+        VStack(spacing: 10) {
+            Avatar(name: contact.displayName, size: 76)
+            Text("Change photo")
+                .font(.subheadline)
+                .foregroundStyle(RegardsDS.accent)
+        }
+        .padding(.top, 16)
+        .padding(.bottom, 6)
+        .frame(maxWidth: .infinity)
+    }
+
+    private var consentBanner: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("↪")
+                .font(RegardsFont.mono(.caption))
+                .foregroundStyle(RegardsDS.accentInk.opacity(0.8))
+                .padding(.top, 2)
+            Text(
+                "Saved changes write back to your device Contacts — only the fields you touch. Never deletes, never merges."
+            )
+            .font(.footnote)
+            .foregroundStyle(RegardsDS.accentInk)
+            .lineSpacing(2)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RegardsDS.accentSoft, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Field sections
+
+    private var nameSection: some View {
+        VStack(spacing: 0) {
+            SectionHeader("Name")
+            RegardsCard {
+                VStack(spacing: 0) {
+                    field("First", value: firstName)
+                    Hair(inset: 16)
+                    field("Last", value: lastName)
+                }
+            }
+        }
+    }
+
+    private var phoneSection: some View {
+        let isPhone = [Channel.phoneCall, .sms, .whatsapp, .signal, .facetime]
+            .contains(contact.preferredChannel)
+        return VStack(spacing: 0) {
+            SectionHeader("Phone")
+            RegardsCard {
+                VStack(spacing: 0) {
+                    field("mobile", value: isPhone ? contact.preferredChannelValue : "")
+                    Hair(inset: 16)
+                    field("home", placeholder: "Add phone")
+                }
+            }
+        }
+    }
+
+    private var emailSection: some View {
+        let isEmail = contact.preferredChannel == .email
+        return VStack(spacing: 0) {
+            SectionHeader("Email")
+            RegardsCard {
+                field("personal",
+                      value: isEmail ? contact.preferredChannelValue : "",
+                      placeholder: "Add email",
+                      touched: isEmail)
+            }
+        }
+    }
+
+    private var postalSection: some View {
+        VStack(spacing: 0) {
+            SectionHeader("Postal address · for holiday cards")
+            RegardsCard {
+                field("home", placeholder: "Add address")
+            }
+        }
+    }
+
+    private var datesSection: some View {
+        VStack(spacing: 0) {
+            SectionHeader("Dates")
+            RegardsCard {
+                VStack(spacing: 0) {
+                    field("Birthday", placeholder: "Add birthday")
+                    Hair(inset: 16)
+                    field("Anniversary", placeholder: "Add anniversary")
+                }
+            }
+        }
+    }
+
+    private var notesSection: some View {
+        VStack(spacing: 0) {
+            SectionHeader("Regards-local · not saved to Contacts")
+            RegardsCard {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Notes")
+                        .font(.footnote)
+                        .foregroundStyle(RegardsDS.muted)
+                    Text(contact.notes.isEmpty ? "No notes." : contact.notes)
+                        .font(.subheadline)
+                        .foregroundStyle(RegardsDS.ink)
+                        .lineSpacing(3)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    // MARK: - Field row
+
+    private func field(_ label: String,
+                       value: String = "",
+                       placeholder: String = "",
+                       touched: Bool = false) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
+            Text(label)
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(RegardsDS.muted)
+                .frame(width: 84, alignment: .leading)
+            HStack(spacing: 6) {
+                Text(value.isEmpty ? placeholder : value)
+                    .font(.body)
+                    .foregroundStyle(value.isEmpty ? RegardsDS.muted : RegardsDS.ink)
+                if touched {
+                    Circle()
+                        .fill(RegardsDS.accent)
+                        .frame(width: 6, height: 6)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    private var firstName: String {
+        let parts = contact.displayName.split(whereSeparator: { $0.isWhitespace })
+        return parts.first.map(String.init) ?? ""
+    }
+
+    private var lastName: String {
+        let parts = contact.displayName.split(whereSeparator: { $0.isWhitespace })
+        return parts.dropFirst().joined(separator: " ")
+    }
+}

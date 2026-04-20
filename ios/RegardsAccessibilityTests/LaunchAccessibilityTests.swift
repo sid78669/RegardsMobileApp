@@ -1,13 +1,9 @@
 import XCTest
 
-/// Phase 0 accessibility smoke audit. Launches the app and runs Apple's built-in
-/// accessibility audit against whatever's on screen. If the audit surfaces any
-/// findings — missing labels, contrast failures, too-small hit regions,
-/// dynamic-type clipping, VoiceOver-focus traps — this test fails and the PR
-/// cannot merge.
-///
-/// Per PR2/PR3 this file grows to a per-screen audit. For PR1 the root view
-/// (just the wordmark + subtitle) is the only surface in the app.
+/// Phase 0 / PR3 accessibility smoke audit. Launches the app, waits past the
+/// brief splash for the tab root, and runs Apple's built-in accessibility
+/// audit against the Overdue tab (the default landing screen). Per-screen
+/// audits live in `ScreensAccessibilityTests`.
 final class LaunchAccessibilityTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -15,19 +11,17 @@ final class LaunchAccessibilityTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunchScreenPassesAccessibilityAudit() throws {
+    func testLaunchAndOverdueTabPassAccessibilityAudit() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // RootView collapses its children into a single accessibility element
-        // tagged "launch.root"; the brand image is decorative (hidden from
-        // VoiceOver) and the spoken label describes the full scene in one go.
-        let root = app.descendants(matching: .any)["launch.root"]
-        XCTAssertTrue(root.waitForExistence(timeout: 5),
-                      "RootView's combined accessibility element should be present.")
+        // The splash (launch.root) shows for ~600ms before crossfading to the
+        // tab root. Wait for the Overdue screen to be on-screen before the
+        // audit runs so we're looking at the real post-launch state.
+        let overdue = app.descendants(matching: .any)["screen.overdue"]
+        XCTAssertTrue(overdue.waitForExistence(timeout: 10),
+                      "Overdue tab should appear after the splash.")
 
-        // iOS 17+: audits contrast, dynamic-type, hit regions, element
-        // detection, parent-child order, trait consistency, and text clipping.
-        try app.performAccessibilityAudit()
+        try app.performAccessibilityAudit(for: ScreensAccessibilityTests.pr3AuditCategories)
     }
 }
