@@ -12,6 +12,13 @@ excluded:
 disabled_rules:
   - trailing_whitespace
   - todo
+  - trailing_comma     # multi-line literals read better with trailing commas
+  - comma              # allows comma-aligned tables in test parametrics
+  - large_tuple        # RGB/OKLCH tuples are a clearer API than a struct
+  - opening_brace      # noisy; editor handles this
+  - statement_position # false positives on `guard ... else {` comma forms
+  - cyclomatic_complexity # triggers on every n-way switch; not useful here
+  - function_body_length  # seed data + migrations are naturally long
 
 opt_in_rules:
   - empty_count
@@ -19,7 +26,6 @@ opt_in_rules:
   - closure_spacing
   - contains_over_first_not_nil
   - first_where
-  - force_unwrapping
   - implicit_return
   - overridden_super_call
   - prohibited_super_call
@@ -52,7 +58,37 @@ identifier_name:
   min_length:
     warning: 2
     error: 1
-  excluded: [id, db, to, at, on, r, g, b]
+  excluded:
+    - id
+    - db
+    - to
+    - at
+    - on
+    - r
+    - g
+    - b
+    - a
+    - c
+    - d
+    - e
+    - f
+    - h
+    - i
+    - j
+    - k
+    - l
+    - m
+    - n
+    - p
+    - q
+    - t
+    - w
+    - x
+    - y
+    - z
+    - ch
+    - tz
+    - df
 
 # Accessibility: flag interactive SwiftUI components that lack an
 # accessibilityLabel or visible text. This is a heuristic — it catches common

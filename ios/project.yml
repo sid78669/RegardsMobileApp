@@ -1,7 +1,7 @@
 name: Regards
 
 options:
-  bundleIdPrefix: com.regardsapp
+  bundleIdPrefix: com.sdahiya
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -23,9 +23,9 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: "YES"
     GCC_WARN_ABOUT_MISSING_NEWLINE: "YES"
     CLANG_WARN_DOCUMENTATION_COMMENTS: "YES"
-    # Simulator-only builds don't need a signing identity. CI and local sim boots
-    # both use this; TestFlight signing is configured in the release workflow in
-    # Phase 3, not here.
+    # Project-level default for test targets and anything that doesn't need a
+    # real identity. The Regards app target overrides this with automatic
+    # signing (see target-level settings below) for local device / TestFlight.
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGNING_REQUIRED: "NO"
     CODE_SIGN_STYLE: Manual
@@ -53,8 +53,6 @@ targets:
           - "**/.DS_Store"
       - path: Regards/PrivacyInfo.xcprivacy
         buildPhase: resources
-    resources:
-      - Regards/Resources/Assets.xcassets
     info:
       path: Regards/Resources/Info.plist
       properties:
@@ -82,12 +80,23 @@ targets:
         LSApplicationQueriesSchemes: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.Regards
+        PRODUCT_BUNDLE_IDENTIFIER: com.sdahiya.regards
         PRODUCT_NAME: Regards
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        INFOPLIST_KEY_CFBundleDisplayName: Regards
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.social-networking
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: "NO"
+        # Automatic signing for local device + TestFlight. CI overrides via
+        # xcodebuild flags (CODE_SIGNING_ALLOWED=NO) because GitHub runners
+        # don't have this dev team's keychain. Team ID BKK9J7A67Y is public
+        # (visible in every signed IPA) so committing it is fine.
+        CODE_SIGN_IDENTITY: "Apple Development"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: BKK9J7A67Y
+        PROVISIONING_PROFILE_SPECIFIER: ""
     dependencies:
       - package: GRDB
 
@@ -98,7 +107,7 @@ targets:
       - path: RegardsTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.sdahiya.RegardsTests
         GENERATE_INFOPLIST_FILE: "YES"
     dependencies:
       - target: Regards
@@ -110,7 +119,7 @@ targets:
       - path: RegardsUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsUITests
+        PRODUCT_BUNDLE_IDENTIFIER: com.sdahiya.RegardsUITests
         GENERATE_INFOPLIST_FILE: "YES"
         TEST_TARGET_NAME: Regards
     dependencies:
@@ -123,7 +132,7 @@ targets:
       - path: RegardsAccessibilityTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.regardsapp.RegardsAccessibilityTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.sdahiya.RegardsAccessibilityTests
         GENERATE_INFOPLIST_FILE: "YES"
         TEST_TARGET_NAME: Regards
     dependencies:

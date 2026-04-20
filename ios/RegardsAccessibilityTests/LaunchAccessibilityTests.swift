@@ -19,8 +19,12 @@ final class LaunchAccessibilityTests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        // Wait for the wordmark so we aren't auditing a blank launch screen.
-        XCTAssertTrue(app.staticTexts["regards"].waitForExistence(timeout: 5))
+        // RootView collapses its children into a single accessibility element
+        // tagged "launch.root"; the brand image is decorative (hidden from
+        // VoiceOver) and the spoken label describes the full scene in one go.
+        let root = app.descendants(matching: .any)["launch.root"]
+        XCTAssertTrue(root.waitForExistence(timeout: 5),
+                      "RootView's combined accessibility element should be present.")
 
         // iOS 17+: audits contrast, dynamic-type, hit regions, element
         // detection, parent-child order, trait consistency, and text clipping.
