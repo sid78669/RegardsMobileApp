@@ -17,11 +17,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Scan Regards/ for networking call sites
         run: |
-          # §11 Transparency claim: the app's source has no calls to
-          # URLSession, NWConnection, CFReadStream, or URLRequest. This
-          # grep is exactly the one the Transparency screen cites — the
-          # claim is only as real as this gate.
-          if grep -RE "URLSession|NWConnection|CFReadStream|URLRequest|\bNWEndpoint\b" ios/Regards 2>/dev/null; then
+          # §11 Transparency claim: the app's source has no *calls* to
+          # URLSession, NWConnection, CFReadStream, or URLRequest. The
+          # patterns match actual code usage — `Foo.` (member access) or
+          # `Foo(` (constructor) — rather than the bare token, so the
+          # same names can appear in user-facing copy (e.g. the
+          # Transparency screen) without tripping the gate.
+          if grep -REn '\b(URLSession|NWConnection|NWEndpoint|URLRequest)[.(]|\bCFReadStream(Create|Open|Read|Ref|Client|Copy)' ios/Regards 2>/dev/null; then
             echo "::error::Networking call sites found in ios/Regards. The app must not make network calls (§11). Move StoreKit-only code to ios/Regards/Platform/Billing if needed."
             exit 1
           fi
