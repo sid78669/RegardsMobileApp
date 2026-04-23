@@ -18,12 +18,19 @@ jobs:
       - name: Scan Regards/ for networking call sites
         run: |
           # §11 Transparency claim: the app's source has no *calls* to
-          # URLSession, NWConnection, CFReadStream, or URLRequest. The
-          # patterns match actual code usage — `Foo.` (member access) or
-          # `Foo(` (constructor) — rather than the bare token, so the
-          # same names can appear in user-facing copy (e.g. the
-          # Transparency screen) without tripping the gate.
-          if grep -REn '\b(URLSession|NWConnection|NWEndpoint|URLRequest)[.(]|\bCFReadStream(Create|Open|Read|Ref|Client|Copy)' ios/Regards 2>/dev/null; then
+          # URLSession, NWConnection, CFReadStream, URLRequest, or
+          # similar networking primitives. The Transparency screen's
+          # public copy ends with "or similar" — this grep backs that
+          # phrase by covering the family-name variants (URLSession*,
+          # NW*, URLProtocol, CF{ReadStream,WriteStream}*) so the "or
+          # similar" tail isn't doing silent work.
+          #
+          # The patterns match actual code usage — `Foo.` (member
+          # access) or `Foo(` (constructor) — rather than the bare
+          # token, so the same names can appear in user-facing copy
+          # (e.g. the Transparency screen itself) without tripping the
+          # gate.
+          if grep -REn '\b(URLSession\w*|NW(Connection|Endpoint|Listener|PathMonitor|Interface|Path)\w*|URLRequest|URLProtocol)[.(]|\bCF(Read|Write)Stream(Create|Open|Read|Write|Ref|Client|Copy)' ios/Regards 2>/dev/null; then
             echo "::error::Networking call sites found in ios/Regards. The app must not make network calls (§11). Move StoreKit-only code to ios/Regards/Platform/Billing if needed."
             exit 1
           fi

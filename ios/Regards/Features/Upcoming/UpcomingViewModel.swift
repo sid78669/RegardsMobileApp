@@ -73,6 +73,9 @@ public final class UpcomingViewModel {
     private static var dayHeaderFormattersByTZ: [String: DateFormatter] = [:]
 
     @MainActor
+    private static var calendarsByTZ: [String: Calendar] = [:]
+
+    @MainActor
     static func timeFormatter(for timezone: TimeZone) -> DateFormatter {
         let key = timezone.identifier
         if let existing = timeFormattersByTZ[key] { return existing }
@@ -96,6 +99,20 @@ public final class UpcomingViewModel {
         df.timeZone = timezone
         dayHeaderFormattersByTZ[key] = df
         return df
+    }
+
+    /// Gregorian calendar cached per TZ. Calendar construction is cheaper
+    /// than DateFormatter but the per-TZ cache is in the same shape as the
+    /// formatters above, and avoiding per-call construction keeps the
+    /// grouping pass allocation-free.
+    @MainActor
+    static func gregorianCalendar(for timezone: TimeZone) -> Calendar {
+        let key = timezone.identifier
+        if let existing = calendarsByTZ[key] { return existing }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timezone
+        calendarsByTZ[key] = calendar
+        return calendar
     }
 
     private func buildRows(contacts: [Contact], now: Date) -> [UpcomingRowState] {
@@ -149,8 +166,7 @@ public final class UpcomingViewModel {
 
     @MainActor
     static func format(dayHeader date: Date, now: Date, timezone: TimeZone) -> String {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timezone
+        let calendar = gregorianCalendar(for: timezone)
         let today = calendar.startOfDay(for: now)
         let day = calendar.startOfDay(for: date)
         let diff = calendar.dateComponents([.day], from: today, to: day).day ?? 0
