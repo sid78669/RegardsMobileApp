@@ -2,9 +2,12 @@ import SwiftUI
 
 public struct ReminderWindowsScreen: View {
     @State private var window: ReminderWindow
+    private let clock: () -> Date
 
-    public init(window: ReminderWindow = .defaultV1()) {
+    public init(window: ReminderWindow = .defaultV1(),
+                clock: @escaping () -> Date = { Date() }) {
         self._window = State(initialValue: window)
+        self.clock = clock
     }
 
     public var body: some View {
@@ -126,10 +129,12 @@ public struct ReminderWindowsScreen: View {
                         if idx < window.allowedTimeRanges.count - 1 { Hair(inset: 16) }
                     }
                     Hair(inset: 16)
+                    // Stub — Phase 1 wires this to a time-range picker. Muted
+                    // so it doesn't look tap-affordable.
                     HStack {
                         Text("+ Add range")
                             .font(.body.weight(.medium))
-                            .foregroundStyle(RegardsDS.accent)
+                            .foregroundStyle(RegardsDS.muted)
                         Spacer()
                     }
                     .padding(.horizontal, 16)
@@ -153,15 +158,28 @@ public struct ReminderWindowsScreen: View {
                         .frame(width: CGFloat(endPct - startPct) * width)
                         .offset(x: CGFloat(startPct) * width)
                 }
-                // 14:00 "now" marker
+                // Real "now" marker — resolved against the window's
+                // timezone so the ruler stays honest for users who travel
+                // across zones (or when the screen is reviewed from a
+                // test harness anchored to a fixed clock).
                 Rectangle()
                     .fill(RegardsDS.ink)
                     .frame(width: 2)
-                    .offset(x: width * (14.0 / 24.0))
+                    .offset(x: width * nowFraction)
             }
         }
         .frame(height: 28)
         .accessibilityHidden(true)
+    }
+
+    /// 0…1 fraction of the current time through the 24-hour day, resolved in
+    /// the window's timezone.
+    private var nowFraction: Double {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = window.timeZone
+        let comps = calendar.dateComponents([.hour, .minute], from: clock())
+        let minutes = Double((comps.hour ?? 0) * 60 + (comps.minute ?? 0))
+        return minutes / 1440.0
     }
 
     private func timeRangeRow(start: String, end: String) -> some View {
@@ -170,9 +188,10 @@ public struct ReminderWindowsScreen: View {
             Text("→").foregroundStyle(RegardsDS.muted)
             timeChip(end)
             Spacer()
+            // Stub — Phase 1 wires the range editor. Muted until interactive.
             Text("Remove")
                 .font(.footnote)
-                .foregroundStyle(RegardsDS.danger)
+                .foregroundStyle(RegardsDS.muted)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -234,9 +253,10 @@ public struct ReminderWindowsScreen: View {
                             .foregroundStyle(RegardsDS.muted)
                     }
                     Spacer()
+                    // Stub — Phase 1 wires the time picker.
                     Text("09:00")
                         .font(RegardsFont.mono(.body).weight(.medium))
-                        .foregroundStyle(RegardsDS.accent)
+                        .foregroundStyle(RegardsDS.muted)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)

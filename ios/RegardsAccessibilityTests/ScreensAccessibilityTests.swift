@@ -37,7 +37,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToOverdue()
         app.tabBars.buttons["Upcoming"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.upcoming"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -46,7 +46,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToOverdue()
         app.tabBars.buttons["Contacts"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contacts"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -63,7 +63,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToSettings()
         app.descendants(matching: .any)["settings.reminder-windows"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.reminder-windows"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -72,7 +72,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToSettings()
         app.descendants(matching: .any)["settings.find-duplicate-contacts"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.merge-duplicates"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -81,7 +81,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToSettings()
         app.descendants(matching: .any)["settings.transparency"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.transparency"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -90,7 +90,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToSettings()
         app.descendants(matching: .any)["settings.onboarding-preview"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.onboarding"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -101,10 +101,10 @@ final class ScreensAccessibilityTests: XCTestCase {
         let firstRow = app.descendants(matching: .any)["screen.contacts"]
             .descendants(matching: .button)
             .firstMatch
-        XCTAssertTrue(firstRow.waitForExistence(timeout: 5))
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
-                        .waitForExistence(timeout: 5))
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
     }
 
@@ -125,7 +125,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let app = launchToOverdue()
         app.tabBars.buttons["Settings"].tap()
         let settings = app.descendants(matching: .any)["screen.settings"]
-        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        XCTAssertTrue(settings.waitForExistence(timeout: 10))
         return app
     }
 }

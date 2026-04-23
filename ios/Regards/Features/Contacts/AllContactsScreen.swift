@@ -6,6 +6,7 @@ import SwiftUI
 public struct AllContactsScreen: View {
     let env: AppEnvironment
     @State private var contacts: [Contact] = []
+    @State private var now: Date = .distantPast
     @State private var searchText: String = ""
 
     public init(env: AppEnvironment) {
@@ -48,10 +49,22 @@ public struct AllContactsScreen: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            contacts = (try? await env.contacts.fetchTracked()) ?? []
-            contacts.sort { $0.priorityTier.rawValue < $1.priorityTier.rawValue }
+            // Cache `now` alongside the fetched list so the "last X days ago"
+            // strings stay consistent across re-renders — Date() inline per
+            // row would recompute every update and drift across day
+            // boundaries while the user sits on the screen.
+            now = Date()
+            do {
+                contacts = try await env.contacts.fetchTracked()
+                contacts.sort { $0.priorityTier.rawValue < $1.priorityTier.rawValue }
+            } catch {
+                Self.log.error("failed to load tracked contacts: \(error, privacy: .public)")
+                contacts = []
+            }
         }
     }
+
+    static let log = RegardsLogger.feature("AllContacts")
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -85,7 +98,7 @@ public struct AllContactsScreen: View {
                     .foregroundStyle(RegardsDS.ink)
                 Text(
                     [contact.cadenceDays.map { CadenceDescriptor.describe(days: $0) },
-                     contact.lastInteractedAt.flatMap { Contact.relativeDescription(for: $0, from: Date()) }
+                     contact.lastInteractedAt.flatMap { Contact.relativeDescription(for: $0, from: now) }
                         .map { "last \($0)" }]
                     .compactMap { $0 }.joined(separator: " · ")
                 )

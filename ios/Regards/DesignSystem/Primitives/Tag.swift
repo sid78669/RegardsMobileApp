@@ -7,7 +7,6 @@ public struct RegardsTag: View {
         case accent
         case overdue
         case soon
-        case ok
     }
 
     public let text: String
@@ -35,7 +34,6 @@ public struct RegardsTag: View {
         case .accent:  return RegardsDS.accentInk
         case .overdue: return RegardsDS.danger
         case .soon:    return RegardsDS.muted
-        case .ok:      return .green
         }
     }
 
@@ -45,7 +43,6 @@ public struct RegardsTag: View {
         case .accent:  return RegardsDS.accentSoft
         case .overdue: return RegardsDS.accentSoft.opacity(0.6)
         case .soon:    return RegardsDS.hairSoft
-        case .ok:      return Color.green.opacity(0.12)
         }
     }
 }

@@ -1,7 +1,12 @@
 import SwiftUI
 
 public struct OverdueScreen: View {
-    @State private var viewModel: OverdueViewModel
+    // `@Bindable` because the segmented control needs `$viewModel.selectedTab`.
+    // Using `@State` would retain the *initial* instance and drop any
+    // subsequent VM the parent passes in (the bug reviewer caught on
+    // ContactDetail). `@Bindable` tracks reads, generates bindings, and
+    // doesn't take ownership.
+    @Bindable var viewModel: OverdueViewModel
     private let upcomingCount: Int
     private let onTapContact: (UUID) -> Void
     private let onTapChannel: (OverdueRowState) -> Void
@@ -10,7 +15,7 @@ public struct OverdueScreen: View {
                 upcomingCount: Int = 7,
                 onTapContact: @escaping (UUID) -> Void = { _ in },
                 onTapChannel: @escaping (OverdueRowState) -> Void = { _ in }) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
         self.upcomingCount = upcomingCount
         self.onTapContact = onTapContact
         self.onTapChannel = onTapChannel

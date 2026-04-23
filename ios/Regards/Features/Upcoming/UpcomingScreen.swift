@@ -1,8 +1,8 @@
 import SwiftUI
 
 public struct UpcomingScreen: View {
-    @State private var viewModel: UpcomingViewModel
-    @State private var segment: OverdueViewModel.Tab = .upcoming
+    let viewModel: UpcomingViewModel
+    @State private var segment: RegardsSegment = .upcoming
     private let overdueCount: Int
     private let onTapContact: (UUID) -> Void
     private let onSwitchToOverdue: () -> Void
@@ -11,7 +11,7 @@ public struct UpcomingScreen: View {
                 overdueCount: Int = 0,
                 onTapContact: @escaping (UUID) -> Void = { _ in },
                 onSwitchToOverdue: @escaping () -> Void = {}) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
         self.overdueCount = overdueCount
         self.onTapContact = onTapContact
         self.onSwitchToOverdue = onSwitchToOverdue

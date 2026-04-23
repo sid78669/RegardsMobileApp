@@ -124,6 +124,15 @@ struct RegardsTabRoot: View {
             .tag(Tab.settings)
         }
         .tint(RegardsDS.accent)
+        // Kick off both VMs up-front so the cross-tab counters on the
+        // segmented control (Overdue shows upcomingCount, Upcoming shows
+        // overdueCount) are populated at launch — otherwise the opposite
+        // tab's `.task` wouldn't fire until the user tapped it.
+        .task {
+            async let overdueLoad: Void = overdueVM.load()
+            async let upcomingLoad: Void = upcomingVM.load()
+            _ = await (overdueLoad, upcomingLoad)
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct ContactDetailScreen: View {
-    @State private var viewModel: ContactDetailViewModel
+    let viewModel: ContactDetailViewModel
     private let onTapEdit: () -> Void
     private let onTapOpenChannel: () -> Void
     private let onTapMarkCaughtUp: () -> Void
@@ -10,7 +10,7 @@ public struct ContactDetailScreen: View {
                 onTapEdit: @escaping () -> Void = {},
                 onTapOpenChannel: @escaping () -> Void = {},
                 onTapMarkCaughtUp: @escaping () -> Void = {}) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
         self.onTapEdit = onTapEdit
         self.onTapOpenChannel = onTapOpenChannel
         self.onTapMarkCaughtUp = onTapMarkCaughtUp
@@ -157,7 +157,7 @@ public struct ContactDetailScreen: View {
                     Spacer()
                     Text("Change")
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(RegardsDS.accent)
+                        .foregroundStyle(RegardsDS.muted)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -234,10 +234,12 @@ public struct ContactDetailScreen: View {
                     .foregroundStyle(valueColor(isAccent: isAccent, isDanger: isDanger))
             }
             Spacer()
+            // Stub label — Phase 1 wires each of these to a real editor. For
+            // now we render muted so it doesn't look tap-affordable.
             if let action {
                 Text(action)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(RegardsDS.accent)
+                    .foregroundStyle(RegardsDS.muted)
             }
         }
         .padding(.horizontal, 16)

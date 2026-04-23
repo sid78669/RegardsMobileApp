@@ -20,8 +20,8 @@ public struct DuplicateCandidateState: Sendable, Identifiable, Equatable {
     public var isSelected: Bool
 }
 
-@Observable
-public final class MergeDuplicatesViewModel: @unchecked Sendable {
+@Observable @MainActor
+public final class MergeDuplicatesViewModel {
 
     public private(set) var candidates: [DuplicateCandidateState] = []
 
@@ -33,7 +33,14 @@ public final class MergeDuplicatesViewModel: @unchecked Sendable {
     }
 
     public func load() async {
-        let all = (try? await contacts.fetchAll()) ?? []
+        let all: [Contact]
+        do {
+            all = try await contacts.fetchAll()
+        } catch {
+            Self.log.error("failed to fetch contacts for duplicate detection: \(error, privacy: .public)")
+            candidates = []
+            return
+        }
         let inputs = all.map { contact in
             let value = contact.preferredChannelValue
             let isPhone = !value.isEmpty
@@ -71,6 +78,8 @@ public final class MergeDuplicatesViewModel: @unchecked Sendable {
         guard let idx = candidates.firstIndex(where: { $0.id == id }) else { return }
         candidates[idx].primaryIsA = isA
     }
+
+    static let log = RegardsLogger.feature("MergeDuplicates")
 
     static func member(from contact: Contact) -> DuplicateCandidateState.Member {
         var phone: String?

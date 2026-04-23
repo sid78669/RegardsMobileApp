@@ -18,20 +18,22 @@ public struct OverdueRowState: Sendable, Identifiable, Equatable {
     public let accessibilityLabel: String
 }
 
-@Observable
-public final class OverdueViewModel: @unchecked Sendable {
+/// `@MainActor` so mutations to `rows` / `selectedTab` are guaranteed to run
+/// on the main actor — the view updates are main-actor-only and every call
+/// site (view `.task`, tab-root init) is already main-actor. No
+/// `@unchecked Sendable` needed; the class doesn't cross actors.
+@Observable @MainActor
+public final class OverdueViewModel {
 
-    public enum Tab: Hashable, Sendable { case overdue, upcoming }
-
-    public var selectedTab: Tab = .overdue
+    public var selectedTab: RegardsSegment = .overdue
     public private(set) var rows: [OverdueRowState] = []
     public private(set) var nextDigestLabel: String = "next digest at 6:00 pm"
 
     private let contacts: any ContactRepository
-    private let clock: @Sendable () -> Date
+    private let clock: () -> Date
 
     public init(contacts: any ContactRepository,
-                clock: @escaping @Sendable () -> Date = { Date() }) {
+                clock: @escaping () -> Date = { Date() }) {
         self.contacts = contacts
         self.clock = clock
     }
@@ -40,17 +42,16 @@ public final class OverdueViewModel: @unchecked Sendable {
         do {
             let all = try await contacts.fetchTracked()
             let now = clock()
-            rows = all.compactMap { contact in
-                Self.makeOverdueRow(for: contact, now: now)
-            }
-            .filter { $0.overdueDays > 0 }
-            .sorted {
-                if $0.priority.rawValue != $1.priority.rawValue {
-                    return $0.priority.rawValue < $1.priority.rawValue
+            rows = all.compactMap { Self.makeOverdueRow(for: $0, now: now) }
+                .filter { $0.overdueDays > 0 }
+                .sorted {
+                    if $0.priority.rawValue != $1.priority.rawValue {
+                        return $0.priority.rawValue < $1.priority.rawValue
+                    }
+                    return $0.overdueDays > $1.overdueDays
                 }
-                return $0.overdueDays > $1.overdueDays
-            }
         } catch {
+            Self.log.error("failed to load tracked contacts: \(error, privacy: .public)")
             rows = []
         }
     }
@@ -63,18 +64,25 @@ public final class OverdueViewModel: @unchecked Sendable {
 
     public var overdueCount: Int { rows.count }
 
+    static let log = RegardsLogger.feature("Overdue")
+
     static func makeOverdueRow(for contact: Contact, now: Date) -> OverdueRowState? {
         guard contact.tracked, let cadenceDays = contact.cadenceDays else { return nil }
         let last = contact.lastInteractedAt ?? contact.createdAt
         let overdueAt = last.addingTimeInterval(TimeInterval(cadenceDays) * 86_400)
-        let overdueSeconds = now.timeIntervalSince(overdueAt)
-        let overdueDays = Int(overdueSeconds / 86_400)
+
+        // DST-correct day count: Calendar.dateComponents honors calendar
+        // boundaries; raw seconds/86_400 is off across DST transitions and
+        // in timezones near day boundaries.
+        let calendar = Calendar.current
+        let days = calendar.dateComponents([.day], from: overdueAt, to: now).day ?? 0
+        let overdueDays = max(0, days)
 
         let context = Contact.AccessibilityContext(
             now: now,
             effectiveLastInteractedAt: contact.lastInteractedAt,
             isOverdue: overdueDays > 0,
-            overdueDays: max(0, overdueDays)
+            overdueDays: overdueDays
         )
 
         return OverdueRowState(
@@ -82,7 +90,7 @@ public final class OverdueViewModel: @unchecked Sendable {
             name: contact.displayName,
             priority: contact.priorityTier,
             isVirtualMerged: contact.contactGroupId != nil,
-            overdueDays: max(0, overdueDays),
+            overdueDays: overdueDays,
             cadenceText: CadenceDescriptor.describe(days: cadenceDays),
             lastInteractedText: contact.lastInteractedAt.flatMap {
                 Contact.relativeDescription(for: $0, from: now)

@@ -50,16 +50,21 @@ public struct TransparencyScreen: View {
 
     private var claimCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("This app cannot reach the internet.")
+            Text("No call-home, provable two ways.")
                 .font(.system(.title, design: .serif).italic())
                 .foregroundStyle(.white)
                 .lineSpacing(3)
             Text(
-                "Not \"won't.\" Cannot. The Linux kernel denies network sockets to this app's UID because "
-                + "android.permission.INTERNET is absent from the manifest."
+                "On Android the guarantee is kernel-enforced: the manifest omits "
+                + "the INTERNET permission, so the OS denies the app a network "
+                + "socket regardless of what the code does. On iOS no equivalent "
+                + "permission exists — any app can open sockets — so the guarantee "
+                + "is source-verifiable instead: no networking frameworks are "
+                + "linked, and App Transport Security is set to refuse arbitrary "
+                + "loads. Rebuild the source and the audit proofs below to confirm."
             )
             .font(.footnote)
-            .foregroundStyle(.white.opacity(0.9))
+            .foregroundStyle(.white.opacity(0.92))
             .lineSpacing(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -73,14 +78,18 @@ public struct TransparencyScreen: View {
             RegardsCard {
                 VStack(spacing: 0) {
                     proofRow(
-                        label: "No INTERNET permission",
-                        status: "AndroidManifest.xml declares zero network permissions.",
+                        label: "Android: no INTERNET permission (kernel-enforced)",
+                        status: "AndroidManifest.xml declares zero network permissions. "
+                              + "Without INTERNET the OS denies socket creation to this app's UID — "
+                              + "network access is impossible, not just policy-forbidden.",
                         value: "<manifest> … no <uses-permission …INTERNET /> …"
                     )
                     Hair(inset: 16)
                     proofRow(
-                        label: "No networking code on iOS",
-                        status: "Neither the networking stack nor the URL-session stack is linked in our modules.",
+                        label: "iOS: no networking frameworks linked (source-verifiable)",
+                        status: "iOS has no INTERNET-style permission to withhold, so we achieve "
+                              + "the same effect at the source: no networking stacks are imported "
+                              + "in our modules, and ATS refuses arbitrary loads.",
                         value: "NSAppTransportSecurity / NSAllowsArbitraryLoads = false"
                     )
                     Hair(inset: 16)
@@ -166,9 +175,11 @@ public struct TransparencyScreen: View {
                     .foregroundStyle(isAccent ? RegardsDS.accent : RegardsDS.muted)
             }
             Spacer()
+            // Stub — Phase 1 wires these to Safari deep links. Muted until
+            // interactive so it doesn't look tap-affordable.
             Text("Open")
                 .font(.subheadline)
-                .foregroundStyle(RegardsDS.accent)
+                .foregroundStyle(RegardsDS.muted)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

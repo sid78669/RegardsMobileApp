@@ -58,9 +58,11 @@ public struct EditContactScreen: View {
     private var heroAvatar: some View {
         VStack(spacing: 10) {
             Avatar(name: contact.displayName, size: 76)
+            // Stub — Phase 1 wires the photo picker. Muted so it doesn't
+            // look tap-affordable.
             Text("Change photo")
                 .font(.subheadline)
-                .foregroundStyle(RegardsDS.accent)
+                .foregroundStyle(RegardsDS.muted)
         }
         .padding(.top, 16)
         .padding(.bottom, 6)

@@ -15,30 +15,40 @@ public struct SettingsScreen: View {
                 SectionHeader("Reminders")
                 RegardsCard {
                     VStack(spacing: 0) {
-                        navRow("Reminder windows",
-                               subtitle: "when it's OK to nudge you",
-                               destination: AnyView(ReminderWindowsScreen()))
+                        navRow(
+                            id: "reminder-windows",
+                            title: "Reminder windows",
+                            subtitle: "when it's OK to nudge you"
+                        ) { ReminderWindowsScreen() }
                         Hair(inset: 16)
-                        navRow("Find duplicate contacts",
-                               subtitle: "virtual merges only",
-                               destination: AnyView(MergeDuplicatesScreen(
+                        navRow(
+                            id: "find-duplicate-contacts",
+                            title: "Find duplicate contacts",
+                            subtitle: "virtual merges only"
+                        ) {
+                            MergeDuplicatesScreen(
                                 viewModel: MergeDuplicatesViewModel(contacts: env.contacts)
-                               )))
+                            )
+                        }
                     }
                 }
 
                 SectionHeader("Privacy")
                 RegardsCard {
-                    navRow("Transparency",
-                           subtitle: "how the privacy claim is verifiable",
-                           destination: AnyView(TransparencyScreen()))
+                    navRow(
+                        id: "transparency",
+                        title: "Transparency",
+                        subtitle: "how the privacy claim is verifiable"
+                    ) { TransparencyScreen() }
                 }
 
                 SectionHeader("Help")
                 RegardsCard {
-                    navRow("Onboarding preview",
-                           subtitle: "revisit the permission intro",
-                           destination: AnyView(OnboardingScreen()))
+                    navRow(
+                        id: "onboarding-preview",
+                        title: "Onboarding preview",
+                        subtitle: "revisit the permission intro"
+                    ) { OnboardingScreen() }
                 }
 
                 Color.clear.frame(height: 40)
@@ -63,9 +73,16 @@ public struct SettingsScreen: View {
         .padding(.top, 8)
     }
 
-    private func navRow(_ title: String,
-                        subtitle: String,
-                        destination: AnyView) -> some View {
+    /// Generic over the destination so we don't pay the `AnyView` identity /
+    /// diffing tax. `id` is an explicit stable accessibility identifier so the
+    /// UI tests in `ScreensAccessibilityTests` don't silently break when copy
+    /// tweaks (e.g. "Find duplicate contacts" → "Detect duplicates").
+    private func navRow<Destination: View>(
+        id: String,
+        title: String,
+        subtitle: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
         NavigationLink(destination: destination) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -88,7 +105,7 @@ public struct SettingsScreen: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("settings.\(title.lowercased().replacingOccurrences(of: " ", with: "-"))")
+        .accessibilityIdentifier("settings.\(id)")
         .accessibilityLabel(title)
         .accessibilityHint(subtitle)
     }

@@ -1,8 +1,8 @@
 import Foundation
 import Observation
 
-@Observable
-public final class ContactDetailViewModel: @unchecked Sendable {
+@Observable @MainActor
+public final class ContactDetailViewModel {
 
     public struct InteractionEntry: Sendable, Identifiable, Equatable {
         public let id: UUID
@@ -16,12 +16,12 @@ public final class ContactDetailViewModel: @unchecked Sendable {
     private let contacts: any ContactRepository
     private let interactionsRepo: any InteractionRepository
     private let contactId: UUID
-    private let clock: @Sendable () -> Date
+    private let clock: () -> Date
 
     public init(contactId: UUID,
                 contacts: any ContactRepository,
                 interactionsRepo: any InteractionRepository,
-                clock: @escaping @Sendable () -> Date = { Date() }) {
+                clock: @escaping () -> Date = { Date() }) {
         self.contactId = contactId
         self.contacts = contacts
         self.interactionsRepo = interactionsRepo
@@ -29,15 +29,29 @@ public final class ContactDetailViewModel: @unchecked Sendable {
     }
 
     public func load() async {
-        contact = try? await contacts.fetch(id: contactId)
-        if let logs = try? await interactionsRepo.fetchRecent(forContact: contactId, limit: 8) {
+        do {
+            contact = try await contacts.fetch(id: contactId)
+            let logs = try await interactionsRepo.fetchRecent(forContact: contactId, limit: 8)
             interactions = logs.map(Self.toEntry)
+        } catch {
+            Self.log.error("failed to load contact \(self.contactId, privacy: .public): \(error, privacy: .public)")
+            contact = nil
+            interactions = []
         }
     }
 
-    static func toEntry(_ log: InteractionLog) -> InteractionEntry {
+    static let log = RegardsLogger.feature("ContactDetail")
+
+    // MARK: - Formatters (constructed once, locale-pinned)
+
+    static let shortDateFormatter: DateFormatter = {
         let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "MMM d"
+        return df
+    }()
+
+    static func toEntry(_ log: InteractionLog) -> InteractionEntry {
         let channel = log.channel?.displayName ?? "Manual"
         let source: String
         switch log.source {
@@ -47,7 +61,7 @@ public final class ContactDetailViewModel: @unchecked Sendable {
         }
         return InteractionEntry(
             id: log.id,
-            dateLabel: df.string(from: log.occurredAt),
+            dateLabel: shortDateFormatter.string(from: log.occurredAt),
             descriptionLabel: "\(channel) · \(source)"
         )
     }
@@ -75,15 +89,14 @@ public final class ContactDetailViewModel: @unchecked Sendable {
             return (0, false)
         }
         let overdueAt = last.addingTimeInterval(TimeInterval(cadence) * 86_400)
-        let days = Int(clock().timeIntervalSince(overdueAt) / 86_400)
+        // Calendar-based day delta to honor DST and timezone boundaries.
+        let days = Calendar.current.dateComponents([.day], from: overdueAt, to: clock()).day ?? 0
         return (max(0, days), days > 0)
     }
 
     public var lastTalkedLabel: String {
         guard let last = contact?.lastInteractedAt else { return "never" }
         let rel = Contact.relativeDescription(for: last, from: clock()) ?? "—"
-        let df = DateFormatter()
-        df.dateFormat = "MMM d"
-        return "\(rel) · \(df.string(from: last))"
+        return "\(rel) · \(Self.shortDateFormatter.string(from: last))"
     }
 }

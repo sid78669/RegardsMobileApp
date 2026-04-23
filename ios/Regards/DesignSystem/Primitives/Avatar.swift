@@ -29,6 +29,9 @@ public struct Avatar: View {
                 .foregroundStyle(tone.foreground)
                 .kerning(0.2)
         }
+        // `.overlay` doesn't participate in parent layout — the ring draws
+        // outside the avatar's bounding frame without changing the hit box
+        // or nudging neighbors by 6pt whenever `hasAccentRing` flips.
         .overlay {
             if hasAccentRing {
                 Circle()
@@ -36,8 +39,7 @@ public struct Avatar: View {
                     .frame(width: size + 6, height: size + 6)
             }
         }
-        .frame(width: size + (hasAccentRing ? 6 : 0),
-               height: size + (hasAccentRing ? 6 : 0))
+        .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
 
@@ -59,21 +61,24 @@ public struct Avatar: View {
     }
 }
 
-/// Fixed 5-tone palette. Values approximate the JSX OKLCH palette in sRGB.
+/// Fixed 5-tone palette. Every color is constructed via `Color(.sRGB, ...)`
+/// so wide-gamut displays match the rest of the design system (`RegardsPalette`
+/// is explicit sRGB). The unqualified `Color(red:green:blue:)` convenience
+/// initializer uses the generic RGB space, which drifts from sRGB off P3.
 struct AvatarTone: Sendable {
     let background: Color
     let foreground: Color
 
     static let palette: [AvatarTone] = [
-        AvatarTone(background: Color(red: 0.89, green: 0.87, blue: 0.81),
-                   foreground: Color(red: 0.38, green: 0.34, blue: 0.27)),
-        AvatarTone(background: Color(red: 0.85, green: 0.91, blue: 0.84),
-                   foreground: Color(red: 0.22, green: 0.38, blue: 0.27)),
-        AvatarTone(background: Color(red: 0.83, green: 0.89, blue: 0.94),
-                   foreground: Color(red: 0.22, green: 0.32, blue: 0.47)),
-        AvatarTone(background: Color(red: 0.92, green: 0.86, blue: 0.84),
-                   foreground: Color(red: 0.44, green: 0.25, blue: 0.22)),
-        AvatarTone(background: Color(red: 0.90, green: 0.85, blue: 0.92),
-                   foreground: Color(red: 0.37, green: 0.22, blue: 0.42)),
+        AvatarTone(background: Color(.sRGB, red: 0.89, green: 0.87, blue: 0.81, opacity: 1),
+                   foreground: Color(.sRGB, red: 0.38, green: 0.34, blue: 0.27, opacity: 1)),
+        AvatarTone(background: Color(.sRGB, red: 0.85, green: 0.91, blue: 0.84, opacity: 1),
+                   foreground: Color(.sRGB, red: 0.22, green: 0.38, blue: 0.27, opacity: 1)),
+        AvatarTone(background: Color(.sRGB, red: 0.83, green: 0.89, blue: 0.94, opacity: 1),
+                   foreground: Color(.sRGB, red: 0.22, green: 0.32, blue: 0.47, opacity: 1)),
+        AvatarTone(background: Color(.sRGB, red: 0.92, green: 0.86, blue: 0.84, opacity: 1),
+                   foreground: Color(.sRGB, red: 0.44, green: 0.25, blue: 0.22, opacity: 1)),
+        AvatarTone(background: Color(.sRGB, red: 0.90, green: 0.85, blue: 0.92, opacity: 1),
+                   foreground: Color(.sRGB, red: 0.37, green: 0.22, blue: 0.42, opacity: 1)),
     ]
 }

@@ -14,8 +14,8 @@ public struct UpcomingRowState: Sendable, Identifiable, Equatable {
     public let dayHeader: String
 }
 
-@Observable
-public final class UpcomingViewModel: @unchecked Sendable {
+@Observable @MainActor
+public final class UpcomingViewModel {
 
     public private(set) var groups: [(header: String, rows: [UpcomingRowState])] = []
     public private(set) var totalCount: Int = 0
@@ -25,12 +25,12 @@ public final class UpcomingViewModel: @unchecked Sendable {
     private let contacts: any ContactRepository
     private let engine: ReminderEngine
     private let window: ReminderWindow
-    private let clock: @Sendable () -> Date
+    private let clock: () -> Date
 
     public init(contacts: any ContactRepository,
                 engine: ReminderEngine = ReminderEngine(),
                 window: ReminderWindow = .defaultV1(),
-                clock: @escaping @Sendable () -> Date = { Date() }) {
+                clock: @escaping () -> Date = { Date() }) {
         self.contacts = contacts
         self.engine = engine
         self.window = window
@@ -43,19 +43,42 @@ public final class UpcomingViewModel: @unchecked Sendable {
             let now = clock()
             let rows = buildRows(contacts: tracked, now: now)
             totalCount = rows.count
-            groups = group(rows: rows, now: now)
+            groups = group(rows: rows)
         } catch {
+            Self.log.error("failed to load upcoming reminders: \(error, privacy: .public)")
             groups = []
             totalCount = 0
         }
     }
+
+    static let log = RegardsLogger.feature("Upcoming")
+
+    // MARK: - Formatters (constructed once, locale-pinned)
+    //
+    // DateFormatter construction is slow and the format we want — "h:mm a"
+    // with lowercase am/pm — is locale-sensitive without an explicit POSIX
+    // pin. Static formatters are reused across every row render.
+    static let timeFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "h:mm a"
+        df.amSymbol = "am"
+        df.pmSymbol = "pm"
+        return df
+    }()
+
+    static let dayHeaderSuffixFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.dateFormat = "EEE MMM d"
+        return df
+    }()
 
     private func buildRows(contacts: [Contact], now: Date) -> [UpcomingRowState] {
         let horizonEnd = now.addingTimeInterval(TimeInterval(horizonDays) * 86_400)
         var rows: [UpcomingRowState] = []
 
         for contact in contacts {
-            // Cadence reminders
             if let cadence = contact.cadenceDays {
                 let last = contact.lastInteractedAt ?? contact.createdAt
                 let overdueAt = last.addingTimeInterval(TimeInterval(cadence) * 86_400)
@@ -81,7 +104,7 @@ public final class UpcomingViewModel: @unchecked Sendable {
         return rows.sorted { $0.scheduledFor < $1.scheduledFor }
     }
 
-    private func group(rows: [UpcomingRowState], now: Date) -> [(header: String, rows: [UpcomingRowState])] {
+    private func group(rows: [UpcomingRowState]) -> [(header: String, rows: [UpcomingRowState])] {
         var ordered: [(String, [UpcomingRowState])] = []
         var seen: [String: Int] = [:]
         for row in rows {
@@ -96,12 +119,8 @@ public final class UpcomingViewModel: @unchecked Sendable {
     }
 
     static func format(time: Date, timezone: TimeZone) -> String {
-        let df = DateFormatter()
-        df.timeZone = timezone
-        df.dateFormat = "h:mm a"
-        df.amSymbol = "am"
-        df.pmSymbol = "pm"
-        return df.string(from: time).lowercased()
+        timeFormatter.timeZone = timezone
+        return timeFormatter.string(from: time).lowercased()
     }
 
     static func format(dayHeader date: Date, now: Date, timezone: TimeZone) -> String {
@@ -111,10 +130,8 @@ public final class UpcomingViewModel: @unchecked Sendable {
         let day = calendar.startOfDay(for: date)
         let diff = calendar.dateComponents([.day], from: today, to: day).day ?? 0
 
-        let df = DateFormatter()
-        df.timeZone = timezone
-        df.dateFormat = "EEE MMM d"
-        let suffix = df.string(from: date)
+        dayHeaderSuffixFormatter.timeZone = timezone
+        let suffix = dayHeaderSuffixFormatter.string(from: date)
 
         if diff == 0 { return "Today · \(suffix)" }
         if diff == 1 { return "Tomorrow · \(suffix)" }

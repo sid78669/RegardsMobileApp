@@ -58,6 +58,7 @@
 		DD20A1B2BD058209D6FE830D /* ContactDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A5B86E2C444859AF9C274C /* ContactDetailViewModel.swift */; };
 		DFB6EF7AF9A6E91D1E8FC0E9 /* AllContactsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5002D63159BA69D9D8E3AC9 /* AllContactsScreen.swift */; };
 		E4B0A7C5A1EA4F5FDAB6B011 /* RegardsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1ADC20C0E7E4CE0DA30722D /* RegardsApp.swift */; };
+		E92FA084FCF3967029B0A2B4 /* RegardsSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404C6B72CE7713CE0C72E979 /* RegardsSegment.swift */; };
 		EFA9DAB6C0C427FB91D046B7 /* ReminderEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F26043F1ADA839A3F73450 /* ReminderEngine.swift */; };
 		F029A2CCAA85DECF7BF8A6B7 /* Avatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB6E204DDDBDE42F14EB95FB /* Avatar.swift */; };
 		F08DC8DBB741CDA9F6B23530 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FDCEF0842E2124C5BA6158C /* UserProfile.swift */; };
@@ -65,6 +66,7 @@
 		F625BD6617F5E1AC2DDDEEBB /* RegardsColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A066353B2C73B917108465E /* RegardsColors.swift */; };
 		F7CFD0A5006B8C4F8447B639 /* MergeDuplicatesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE62539B723BA47983FEEB8 /* MergeDuplicatesScreen.swift */; };
 		FB5E64AD9A52BEF429194D6F /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 1A8E1B586940E1B4EED330AE /* GRDB */; };
+		FD614B160C4DB2B23EB15325 /* RegardsLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBC9E9A10F4ACE36099418D /* RegardsLogger.swift */; };
 		FD93025B908FC944215CA8CD /* ReminderWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C08F1EDF2F2D7AA655AB07 /* ReminderWindow.swift */; };
 /* End PBXBuildFile section */
 
@@ -109,10 +111,12 @@
 		212E7604734F51D4345DEAFB /* TransparencyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransparencyScreen.swift; sourceTree = "<group>"; };
 		282A9FA27C27C33B29E89167 /* MergeDuplicatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeDuplicatesViewModel.swift; sourceTree = "<group>"; };
 		2CDAA3F4C29BD47652C28A2B /* InteractionLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractionLog.swift; sourceTree = "<group>"; };
+		2EBC9E9A10F4ACE36099418D /* RegardsLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegardsLogger.swift; sourceTree = "<group>"; };
 		2FDCEF0842E2124C5BA6158C /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		31A02186F019EB95A53170B0 /* DuplicateDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateDetector.swift; sourceTree = "<group>"; };
 		34C83038855D3F5D94D87075 /* ChannelGlyph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelGlyph.swift; sourceTree = "<group>"; };
 		3A066353B2C73B917108465E /* RegardsColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegardsColors.swift; sourceTree = "<group>"; };
+		404C6B72CE7713CE0C72E979 /* RegardsSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegardsSegment.swift; sourceTree = "<group>"; };
 		41BCF034E33E6A28F1BD26F0 /* RegardsUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RegardsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		41C65FC7F190CCD94311E1CA /* Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Records.swift; sourceTree = "<group>"; };
 		479B4EFD6960B8E62D8635BE /* LaunchAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAccessibilityTests.swift; sourceTree = "<group>"; };
@@ -388,7 +392,9 @@
 			isa = PBXGroup;
 			children = (
 				FD23D49A80EFB8405D107012 /* CadenceDescriptor.swift */,
+				2EBC9E9A10F4ACE36099418D /* RegardsLogger.swift */,
 				09E07B9F903565C1FB59DD56 /* RegardsNavBar.swift */,
+				404C6B72CE7713CE0C72E979 /* RegardsSegment.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -660,7 +666,9 @@
 				E4B0A7C5A1EA4F5FDAB6B011 /* RegardsApp.swift in Sources */,
 				F1A853D787117AF7C62EF4EB /* RegardsColor.swift in Sources */,
 				F625BD6617F5E1AC2DDDEEBB /* RegardsColors.swift in Sources */,
+				FD614B160C4DB2B23EB15325 /* RegardsLogger.swift in Sources */,
 				615ED8581AF3F435F13B146D /* RegardsNavBar.swift in Sources */,
+				E92FA084FCF3967029B0A2B4 /* RegardsSegment.swift in Sources */,
 				DB0FB5301322714764DC1671 /* RegardsTypography.swift in Sources */,
 				EFA9DAB6C0C427FB91D046B7 /* ReminderEngine.swift in Sources */,
 				FD93025B908FC944215CA8CD /* ReminderWindow.swift in Sources */,

@@ -1,10 +1,10 @@
 import SwiftUI
 
 public struct MergeDuplicatesScreen: View {
-    @State private var viewModel: MergeDuplicatesViewModel
+    let viewModel: MergeDuplicatesViewModel
 
     public init(viewModel: MergeDuplicatesViewModel) {
-        self._viewModel = State(initialValue: viewModel)
+        self.viewModel = viewModel
     }
 
     public var body: some View {
@@ -105,9 +105,11 @@ struct CandidateCard: View {
                     .font(RegardsFont.mono(.caption))
                     .foregroundStyle(RegardsDS.muted)
                 Spacer()
+                // Stub — Phase 1 wires skip-candidate persistence. Muted
+                // until interactive.
                 Text("Skip")
                     .font(.footnote.weight(.medium))
-                    .foregroundStyle(RegardsDS.accent)
+                    .foregroundStyle(RegardsDS.muted)
             }
 
             HStack(spacing: 10) {

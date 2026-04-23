@@ -29,13 +29,24 @@ public struct RegardsNavBar: View {
                     Spacer().frame(height: 17)
                 }
                 Spacer()
+                // Render the right action as a `Button` only when the caller
+                // actually provided a handler — otherwise show inert muted
+                // text so it doesn't look tap-affordable. (Stubs during mock
+                // parity were showing as accent-colored "buttons" with no
+                // effect, which is the worst of both worlds.)
                 if let rightAction {
-                    Button {
-                        rightAction.handler?()
-                    } label: {
+                    if let handler = rightAction.handler {
+                        Button {
+                            handler()
+                        } label: {
+                            Text(rightAction.text)
+                                .font(.body)
+                                .foregroundStyle(RegardsDS.accent)
+                        }
+                    } else {
                         Text(rightAction.text)
                             .font(.body)
-                            .foregroundStyle(RegardsDS.accent)
+                            .foregroundStyle(RegardsDS.muted)
                     }
                 }
             }
