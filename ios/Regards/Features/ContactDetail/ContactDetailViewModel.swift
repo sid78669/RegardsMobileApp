@@ -17,15 +17,21 @@ public final class ContactDetailViewModel {
     private let interactionsRepo: any InteractionRepository
     private let contactId: UUID
     private let clock: () -> Date
+    private let calendar: Calendar
 
+    /// `calendar` is injected so tests can pin the day math to a fixed TZ;
+    /// see sibling note in `OverdueViewModel` on the intentional
+    /// user-local-vs-window-TZ split.
     public init(contactId: UUID,
                 contacts: any ContactRepository,
                 interactionsRepo: any InteractionRepository,
-                clock: @escaping () -> Date = { Date() }) {
+                clock: @escaping () -> Date = { Date() },
+                calendar: Calendar = .current) {
         self.contactId = contactId
         self.contacts = contacts
         self.interactionsRepo = interactionsRepo
         self.clock = clock
+        self.calendar = calendar
     }
 
     public func load() async {
@@ -43,7 +49,14 @@ public final class ContactDetailViewModel {
     static let log = RegardsLogger.feature("ContactDetail")
 
     // MARK: - Formatters (constructed once, locale-pinned)
-
+    //
+    // `@MainActor` because `static let` on an `@MainActor` class doesn't
+    // inherit the class's actor isolation, and `DateFormatter` isn't
+    // Sendable — Swift 6 strict concurrency flags a shared non-Sendable
+    // static otherwise. This formatter has no timezone (it's device-local
+    // short date), so unlike `UpcomingViewModel` it doesn't need a per-TZ
+    // cache — one instance is enough.
+    @MainActor
     static let shortDateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_US_POSIX")
@@ -51,6 +64,7 @@ public final class ContactDetailViewModel {
         return df
     }()
 
+    @MainActor
     static func toEntry(_ log: InteractionLog) -> InteractionEntry {
         let channel = log.channel?.displayName ?? "Manual"
         let source: String
@@ -90,7 +104,7 @@ public final class ContactDetailViewModel {
         }
         let overdueAt = last.addingTimeInterval(TimeInterval(cadence) * 86_400)
         // Calendar-based day delta to honor DST and timezone boundaries.
-        let days = Calendar.current.dateComponents([.day], from: overdueAt, to: clock()).day ?? 0
+        let days = calendar.dateComponents([.day], from: overdueAt, to: clock()).day ?? 0
         return (max(0, days), days > 0)
     }
 

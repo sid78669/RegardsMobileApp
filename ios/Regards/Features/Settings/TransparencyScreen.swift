@@ -50,18 +50,19 @@ public struct TransparencyScreen: View {
 
     private var claimCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("No call-home, provable two ways.")
+            Text("No call-home. Android enforces it; iOS makes it auditable.")
                 .font(.system(.title, design: .serif).italic())
                 .foregroundStyle(.white)
                 .lineSpacing(3)
             Text(
                 "On Android the guarantee is kernel-enforced: the manifest omits "
                 + "the INTERNET permission, so the OS denies the app a network "
-                + "socket regardless of what the code does. On iOS no equivalent "
-                + "permission exists — any app can open sockets — so the guarantee "
-                + "is source-verifiable instead: no networking frameworks are "
-                + "linked, and App Transport Security is set to refuse arbitrary "
-                + "loads. Rebuild the source and the audit proofs below to confirm."
+                + "socket no matter what the code does. On iOS there is no "
+                + "equivalent permission to withhold — any app can open sockets — "
+                + "so the guarantee is source-auditable instead: the app's source "
+                + "has zero call sites to URLSession, NWConnection, CFReadStream, "
+                + "or similar, and CI fails the build the moment one appears. "
+                + "Pull the source, grep it, rebuild the binary yourself."
             )
             .font(.footnote)
             .foregroundStyle(.white.opacity(0.92))
@@ -86,11 +87,13 @@ public struct TransparencyScreen: View {
                     )
                     Hair(inset: 16)
                     proofRow(
-                        label: "iOS: no networking frameworks linked (source-verifiable)",
-                        status: "iOS has no INTERNET-style permission to withhold, so we achieve "
-                              + "the same effect at the source: no networking stacks are imported "
-                              + "in our modules, and ATS refuses arbitrary loads.",
-                        value: "NSAppTransportSecurity / NSAllowsArbitraryLoads = false"
+                        label: "iOS: zero networking call sites (source-auditable)",
+                        status: "Foundation itself is of course linked — that's not the claim. "
+                              + "The claim is that the app's source code contains no calls to "
+                              + "URLSession, NWConnection, CFReadStream, or any other networking "
+                              + "primitive. CI greps every PR and fails the build if a match "
+                              + "appears; App Transport Security is a second fence underneath.",
+                        value: "git grep \"URLSession|NWConnection|CFReadStream|URLRequest\"  # → 0 hits"
                     )
                     Hair(inset: 16)
                     proofRow(

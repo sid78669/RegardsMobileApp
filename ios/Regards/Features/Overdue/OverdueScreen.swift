@@ -1,24 +1,27 @@
 import SwiftUI
 
 public struct OverdueScreen: View {
-    // `@Bindable` because the segmented control needs `$viewModel.selectedTab`.
-    // Using `@State` would retain the *initial* instance and drop any
-    // subsequent VM the parent passes in (the bug reviewer caught on
-    // ContactDetail). `@Bindable` tracks reads, generates bindings, and
-    // doesn't take ownership.
-    @Bindable var viewModel: OverdueViewModel
+    let viewModel: OverdueViewModel
+    // View-local segment state + callback — same pattern as
+    // `UpcomingScreen`. The tab root owns which actual `TabView` tab is
+    // shown; this binding only drives the pill highlight and fires the
+    // callback that asks the tab root to switch.
+    @State private var segment: RegardsSegment = .overdue
     private let upcomingCount: Int
     private let onTapContact: (UUID) -> Void
     private let onTapChannel: (OverdueRowState) -> Void
+    private let onSwitchToUpcoming: () -> Void
 
     public init(viewModel: OverdueViewModel,
                 upcomingCount: Int = 7,
                 onTapContact: @escaping (UUID) -> Void = { _ in },
-                onTapChannel: @escaping (OverdueRowState) -> Void = { _ in }) {
+                onTapChannel: @escaping (OverdueRowState) -> Void = { _ in },
+                onSwitchToUpcoming: @escaping () -> Void = {}) {
         self.viewModel = viewModel
         self.upcomingCount = upcomingCount
         self.onTapContact = onTapContact
         self.onTapChannel = onTapChannel
+        self.onSwitchToUpcoming = onSwitchToUpcoming
     }
 
     public var body: some View {
@@ -32,7 +35,13 @@ public struct OverdueScreen: View {
                 .padding(.top, 10)
 
                 RegardsSegmentedControl(
-                    selection: $viewModel.selectedTab,
+                    selection: Binding(
+                        get: { segment },
+                        set: { newValue in
+                            segment = newValue
+                            if newValue == .upcoming { onSwitchToUpcoming() }
+                        }
+                    ),
                     options: [
                         .init(id: .overdue,  label: "Overdue",  count: viewModel.overdueCount),
                         .init(id: .upcoming, label: "Upcoming", count: upcomingCount),
@@ -75,7 +84,10 @@ public struct OverdueScreen: View {
         .background(RegardsDS.background.ignoresSafeArea())
         .scrollContentBackground(.hidden)
         .accessibilityIdentifier("screen.overdue")
-        .task { await viewModel.load() }
+        // No `.task { await viewModel.load() }` here — `RegardsTabRoot`
+        // loads both tab VMs concurrently on root appear so the cross-tab
+        // counters (Upcoming: N / Overdue: N) are populated before the
+        // user sees either screen.
     }
 
     private var subtitle: String {

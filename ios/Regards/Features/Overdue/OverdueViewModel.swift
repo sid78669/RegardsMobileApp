@@ -25,24 +25,33 @@ public struct OverdueRowState: Sendable, Identifiable, Equatable {
 @Observable @MainActor
 public final class OverdueViewModel {
 
-    public var selectedTab: RegardsSegment = .overdue
     public private(set) var rows: [OverdueRowState] = []
     public private(set) var nextDigestLabel: String = "next digest at 6:00 pm"
 
     private let contacts: any ContactRepository
     private let clock: () -> Date
+    private let calendar: Calendar
 
+    /// `calendar` is injected so tests (and future multi-timezone logic)
+    /// can pin the day math to a fixed TZ. Production uses `.current`
+    /// (user-local), which drifts from `window.timeZone` when the user
+    /// travels — "6d overdue" computed here may disagree by one calendar
+    /// day with "fires today" computed against the window's TZ in
+    /// `ReminderEngine`. Intentional: the overdue label describes the
+    /// user's perception right now, not the scheduling clock.
     public init(contacts: any ContactRepository,
-                clock: @escaping () -> Date = { Date() }) {
+                clock: @escaping () -> Date = { Date() },
+                calendar: Calendar = .current) {
         self.contacts = contacts
         self.clock = clock
+        self.calendar = calendar
     }
 
     public func load() async {
         do {
             let all = try await contacts.fetchTracked()
             let now = clock()
-            rows = all.compactMap { Self.makeOverdueRow(for: $0, now: now) }
+            rows = all.compactMap { Self.makeOverdueRow(for: $0, now: now, calendar: calendar) }
                 .filter { $0.overdueDays > 0 }
                 .sorted {
                     if $0.priority.rawValue != $1.priority.rawValue {
@@ -66,7 +75,9 @@ public final class OverdueViewModel {
 
     static let log = RegardsLogger.feature("Overdue")
 
-    static func makeOverdueRow(for contact: Contact, now: Date) -> OverdueRowState? {
+    static func makeOverdueRow(for contact: Contact,
+                               now: Date,
+                               calendar: Calendar) -> OverdueRowState? {
         guard contact.tracked, let cadenceDays = contact.cadenceDays else { return nil }
         let last = contact.lastInteractedAt ?? contact.createdAt
         let overdueAt = last.addingTimeInterval(TimeInterval(cadenceDays) * 86_400)
@@ -74,7 +85,6 @@ public final class OverdueViewModel {
         // DST-correct day count: Calendar.dateComponents honors calendar
         // boundaries; raw seconds/86_400 is off across DST transitions and
         // in timezones near day boundaries.
-        let calendar = Calendar.current
         let days = calendar.dateComponents([.day], from: overdueAt, to: now).day ?? 0
         let overdueDays = max(0, days)
 

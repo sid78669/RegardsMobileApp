@@ -75,7 +75,8 @@ public struct UpcomingScreen: View {
         .background(RegardsDS.background.ignoresSafeArea())
         .scrollContentBackground(.hidden)
         .accessibilityIdentifier("screen.upcoming")
-        .task { await viewModel.load() }
+        // Load is owned by `RegardsTabRoot` — see sibling note in
+        // `OverdueScreen`.
     }
 
     private var empty: some View {

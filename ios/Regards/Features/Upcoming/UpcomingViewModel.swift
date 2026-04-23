@@ -53,26 +53,50 @@ public final class UpcomingViewModel {
 
     static let log = RegardsLogger.feature("Upcoming")
 
-    // MARK: - Formatters (constructed once, locale-pinned)
+    // MARK: - Formatters (cached per timezone, locale-pinned)
     //
-    // DateFormatter construction is slow and the format we want — "h:mm a"
-    // with lowercase am/pm — is locale-sensitive without an explicit POSIX
-    // pin. Static formatters are reused across every row render.
-    static let timeFormatter: DateFormatter = {
+    // DateFormatter construction is slow, the format we want — "h:mm a" with
+    // lowercase am/pm — is locale-sensitive without an explicit POSIX pin,
+    // and mutating a shared formatter's `timeZone` per call is fragile
+    // (Swift 6 strict concurrency would also flag a single non-Sendable
+    // static being written from multiple call sites). We cache one formatter
+    // per TZ identifier, created on first use and reused forever after.
+    //
+    // `@MainActor` on the caches matches the isolation of every call site
+    // (every view model is `@MainActor`) — static members don't inherit
+    // class isolation, so this has to be explicit.
+
+    @MainActor
+    private static var timeFormattersByTZ: [String: DateFormatter] = [:]
+
+    @MainActor
+    private static var dayHeaderFormattersByTZ: [String: DateFormatter] = [:]
+
+    @MainActor
+    static func timeFormatter(for timezone: TimeZone) -> DateFormatter {
+        let key = timezone.identifier
+        if let existing = timeFormattersByTZ[key] { return existing }
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "h:mm a"
         df.amSymbol = "am"
         df.pmSymbol = "pm"
+        df.timeZone = timezone
+        timeFormattersByTZ[key] = df
         return df
-    }()
+    }
 
-    static let dayHeaderSuffixFormatter: DateFormatter = {
+    @MainActor
+    static func dayHeaderSuffixFormatter(for timezone: TimeZone) -> DateFormatter {
+        let key = timezone.identifier
+        if let existing = dayHeaderFormattersByTZ[key] { return existing }
         let df = DateFormatter()
         df.locale = Locale(identifier: "en_US_POSIX")
         df.dateFormat = "EEE MMM d"
+        df.timeZone = timezone
+        dayHeaderFormattersByTZ[key] = df
         return df
-    }()
+    }
 
     private func buildRows(contacts: [Contact], now: Date) -> [UpcomingRowState] {
         let horizonEnd = now.addingTimeInterval(TimeInterval(horizonDays) * 86_400)
@@ -118,11 +142,12 @@ public final class UpcomingViewModel {
         return ordered
     }
 
+    @MainActor
     static func format(time: Date, timezone: TimeZone) -> String {
-        timeFormatter.timeZone = timezone
-        return timeFormatter.string(from: time).lowercased()
+        timeFormatter(for: timezone).string(from: time).lowercased()
     }
 
+    @MainActor
     static func format(dayHeader date: Date, now: Date, timezone: TimeZone) -> String {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timezone
@@ -130,8 +155,7 @@ public final class UpcomingViewModel {
         let day = calendar.startOfDay(for: date)
         let diff = calendar.dateComponents([.day], from: today, to: day).day ?? 0
 
-        dayHeaderSuffixFormatter.timeZone = timezone
-        let suffix = dayHeaderSuffixFormatter.string(from: date)
+        let suffix = dayHeaderSuffixFormatter(for: timezone).string(from: date)
 
         if diff == 0 { return "Today · \(suffix)" }
         if diff == 1 { return "Tomorrow · \(suffix)" }

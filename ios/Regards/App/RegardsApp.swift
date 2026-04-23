@@ -95,7 +95,8 @@ struct RegardsTabRoot: View {
                     viewModel: overdueVM,
                     upcomingCount: upcomingVM.totalCount,
                     onTapContact: { _ in },
-                    onTapChannel: { _ in }
+                    onTapChannel: { _ in },
+                    onSwitchToUpcoming: { selected = .upcoming }
                 )
             }
             .tabItem { Label("Overdue", systemImage: "exclamationmark.circle") }
