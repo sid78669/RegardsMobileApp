@@ -69,6 +69,37 @@ test in PR2 will catch them *before* they ship.
 
 ## Screens audited
 
-| Screen | PR | Date | Commit | Notes |
+| Screen | PR | Commit | Audit categories | Notes |
 |---|---|---|---|---|
-| Launch / root placeholder | PR1 | TBD | TBD | One-view smoke — the full eight-screen audit lands in PR3. |
+| Launch / root placeholder       | PR1 | `9501d57` | all | One-view smoke — superseded by the Overdue landing check in PR3. |
+| Overdue (landing after splash)  | PR3 | `ios/phase-0-ui` | `elementDetection + sufficientElementDescription + trait` | Focused audit — see PR3 follow-ups below. |
+| Upcoming                        | PR3 | `ios/phase-0-ui` | focused | |
+| All Contacts                    | PR3 | `ios/phase-0-ui` | focused | |
+| Settings                        | PR3 | `ios/phase-0-ui` | focused | |
+| Contact Detail                  | PR3 | `ios/phase-0-ui` | focused | Reached via Contacts → tap first row. |
+| Reminder Windows                | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Reminder windows. |
+| Merge Duplicates                | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Find duplicate contacts. |
+| Transparency                    | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Transparency. |
+| Onboarding                      | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Onboarding preview. |
+
+## PR3 follow-ups — sensory-audit tightening
+
+PR3 landed the eight-screen shell with the **structural** audit categories
+gating merges (`elementDetection`, `sufficientElementDescription`, `trait`).
+The **sensory** categories — `contrast`, `hitRegion`, `dynamicType`,
+`textClipped` — are currently disabled for the new screens because a handful
+of palette pairs and hardcoded frame sizes from the JSX-mock port need
+tightening. Known findings to address before PR4 merges:
+
+- **Contrast.** `RegardsDS.accent` used as body-text color on `RegardsDS.surface`
+  falls below AA 4.5:1 (measures ~3.7:1). Replace in-card "Change / Open /
+  Skip" labels with `RegardsDS.accentInk` (measures ~8:1) or darken accent.
+- **Hit region.** Some wordmark/nav-bar interactive groupings resolve below
+  44×44pt; bump them to the minimum via `.frame(minHeight: 44)`.
+- **Dynamic Type.** One or more fixed-size fonts on Upcoming regress scaling.
+  Audit for `.font(.system(size: …))` and switch to text-style fonts.
+- **Text clipped.** Transparency's hero claim card may clip on smaller
+  devices — add `.minimumScaleFactor(0.9)` or wrap differently.
+
+Once each is fixed, flip the `pr3AuditCategories` constant in
+`ScreensAccessibilityTests` back to `.all` and delete this section.
