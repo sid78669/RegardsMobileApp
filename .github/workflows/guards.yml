@@ -14,7 +14,7 @@ jobs:
     name: No networking code (§11)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Scan Regards/ for networking call sites
         run: |
           # §11 Transparency claim: the app's source has no *calls* to
@@ -40,7 +40,7 @@ jobs:
     name: Domain layer is platform-free (§5)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Scan ios/Regards/Domain for platform imports
         run: |
           if [ -d ios/Regards/Domain ] && grep -RE "^import (UIKit|SwiftUI|Contacts|EventKit|UserNotifications|GRDB|StoreKit)$" ios/Regards/Domain 2>/dev/null; then
@@ -53,7 +53,7 @@ jobs:
     name: project.yml syntax
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate project.yml is parseable YAML
         run: python3 -c "import yaml,sys; yaml.safe_load(open('ios/project.yml'))"
 
@@ -61,7 +61,7 @@ jobs:
     name: Markdown link check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           config-file: .github/markdown-link-check.json
