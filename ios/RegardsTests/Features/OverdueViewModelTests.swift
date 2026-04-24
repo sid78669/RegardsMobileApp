@@ -6,8 +6,18 @@ import Testing
 /// The VM injects `Calendar` so we can pin a fixed timezone for the test —
 /// production code defaults to `.current` (user-local), which drifts from
 /// `window.timeZone` by a calendar day across DST transitions and for
-/// travelers. These tests document the invariant the reviewer asked us to
-/// lock in on the 2026 fall-back boundary.
+/// travelers.
+///
+/// The canonical divergence between seconds-based math and calendar-based
+/// math is **spring-forward**: wall-clock advances by one day but real
+/// elapsed time is 23 hours, so `Int(seconds / 86_400)` undercounts by one
+/// day. Fall-back *gains* an hour, so seconds-based rounding still lands on
+/// the right day in normal cases — fixtures anchored on fall-back don't
+/// actually exercise the bug the Calendar fix prevents.
+///
+/// Both directions kept as regression tests because devs instinctively
+/// reach for `seconds / 86_400`; if someone reverts, spring-forward is the
+/// one that trips.
 @MainActor
 struct OverdueViewModelTests {
 
@@ -38,48 +48,39 @@ struct OverdueViewModelTests {
         )
     }
 
-    // MARK: - DST fall-back (America/Los_Angeles, 2026-11-01)
+    // MARK: - Spring-forward (America/Los_Angeles, 2026-03-08)
 
-    /// On Nov 1 2026 at 02:00 LA, the clock falls back to 01:00. A naive
-    /// `(now - lastInteracted) / 86_400` counts that extra hour as a real
-    /// calendar day under the wrong rounding, pushing a contact that's
-    /// exactly 7 calendar-days overdue to either 6 or 8 depending on which
-    /// direction the extra hour lands. Calendar-based day math is
-    /// transition-aware and returns 7 exactly.
-    @Test("Fall-back DST boundary: calendar day count is exactly 7")
-    func fallBackBoundary() {
+    /// Wall-clock 09:00 Sat Mar 7 → 09:00 Sun Mar 8 LA = **one calendar
+    /// day** but only 23 real hours (02:00 → 03:00 springs forward). Seconds-
+    /// based math: `82800 / 86_400 = 0` → **undercounts by a day**.
+    /// Calendar-based math correctly returns 1. If anyone reverts
+    /// `makeOverdueRow` to `Int(seconds / 86_400)`, this test fails.
+    @Test("Spring-forward boundary: calendar day count is 1, not 0")
+    func springForwardBoundary() {
         let la = "America/Los_Angeles"
         let calendar = Self.makeCalendar(tz: la)
-        // Last interacted: Wed Oct 22 2026 09:00 LA (pre-DST).
-        let last = Self.date("2026-10-22 09:00", tz: la)
-        // Now: Fri Oct 30 2026 09:00 LA (post-DST, 8 calendar days later).
-        let now = Self.date("2026-10-30 09:00", tz: la)
-        let contact = Self.makeContact(lastInteractedAt: last, cadenceDays: 1)
+        let last = Self.date("2026-03-07 09:00", tz: la)
+        let now  = Self.date("2026-03-08 09:00", tz: la)  // 23h elapsed, 1 wall day
+        let contact = Self.makeContact(lastInteractedAt: last, cadenceDays: 0)
 
         let row = OverdueViewModel.makeOverdueRow(for: contact, now: now, calendar: calendar)
-
-        // overdueAt = last + 1 day = Oct 23 09:00 LA.
-        // Calendar day delta from Oct 23 09:00 to Oct 30 09:00 = 7.
-        #expect(row?.overdueDays == 7)
+        #expect(row?.overdueDays == 1)
     }
 
-    /// Fires one row across the actual DST transition (Oct 31 pre → Nov 2 post).
-    /// Seconds-based math computes 2 days + 3600 s ≈ 2.04 days (rounds to 2),
-    /// but some simulator locales round on the seam. Calendar math is
-    /// unambiguously 2 calendar days.
-    @Test("Across DST fall-back: two calendar days between Oct 31 and Nov 2")
-    func acrossTransition() {
+    /// Spring-forward across multiple days — exact 14 calendar days between
+    /// Feb 23 09:00 PST and Mar 9 09:00 PDT, despite only 14·24 − 1 = 335
+    /// real hours. Seconds math: `1206000 / 86_400 = 13.96 → 13` (one short).
+    /// Calendar: 14.
+    @Test("Spring-forward spans multi-day window: calendar returns the full count")
+    func springForwardMultiDay() {
         let la = "America/Los_Angeles"
         let calendar = Self.makeCalendar(tz: la)
-        let last = Self.date("2026-10-30 09:00", tz: la)  // pre-fall-back
-        let now  = Self.date("2026-11-02 09:00", tz: la)  // post-fall-back
-        let contact = Self.makeContact(lastInteractedAt: last, cadenceDays: 1)
+        let last = Self.date("2026-02-23 09:00", tz: la)
+        let now  = Self.date("2026-03-09 09:00", tz: la)  // spans 2026-03-08 DST
+        let contact = Self.makeContact(lastInteractedAt: last, cadenceDays: 0)
 
         let row = OverdueViewModel.makeOverdueRow(for: contact, now: now, calendar: calendar)
-
-        // last + cadence(1 day) = Oct 31 09:00. From there to Nov 2 09:00 is
-        // exactly 2 calendar days, DST seam included.
-        #expect(row?.overdueDays == 2)
+        #expect(row?.overdueDays == 14)
     }
 
     // MARK: - Happy path sanity
