@@ -2,16 +2,13 @@ import SwiftUI
 
 public struct ContactDetailScreen: View {
     let viewModel: ContactDetailViewModel
-    private let onTapEdit: () -> Void
     private let onTapOpenChannel: () -> Void
     private let onTapMarkCaughtUp: () -> Void
 
     public init(viewModel: ContactDetailViewModel,
-                onTapEdit: @escaping () -> Void = {},
                 onTapOpenChannel: @escaping () -> Void = {},
                 onTapMarkCaughtUp: @escaping () -> Void = {}) {
         self.viewModel = viewModel
-        self.onTapEdit = onTapEdit
         self.onTapOpenChannel = onTapOpenChannel
         self.onTapMarkCaughtUp = onTapMarkCaughtUp
     }
@@ -50,11 +47,19 @@ public struct ContactDetailScreen: View {
         .scrollContentBackground(.hidden)
         .accessibilityIdentifier("screen.contact-detail")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Edit", action: onTapEdit)
-                    // `accentInk` (darker) passes AA body contrast on the
-                    // system nav bar surface; `accent` measures ~3.7:1.
-                    .foregroundStyle(RegardsDS.accentInk)
+            if let contact = viewModel.contact {
+                ToolbarItem(placement: .topBarTrailing) {
+                    // `NavigationLink(value:)` so Edit integrates with
+                    // whichever NavigationStack is hosting this screen —
+                    // the tab root / AllContactsScreen's stack supplies a
+                    // `.navigationDestination(for: Contact.self)` that
+                    // renders `EditContactScreen`. This keeps the push
+                    // idiomatic (no closure plumbing) and the button live.
+                    NavigationLink(value: contact) {
+                        Text("Edit")
+                            .foregroundStyle(RegardsDS.accentInk)
+                    }
+                }
             }
         }
         .task { await viewModel.load() }

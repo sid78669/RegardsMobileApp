@@ -69,18 +69,24 @@ test in PR2 will catch them *before* they ship.
 
 ## Screens audited
 
-| Screen | PR | Commit | Audit categories | Notes |
-|---|---|---|---|---|
-| Launch / root placeholder       | PR1 | `9501d57` | all | One-view smoke — superseded by the Overdue landing check in PR3. |
-| Overdue (landing after splash)  | PR3 | `ios/phase-0-ui` | `elementDetection + sufficientElementDescription + trait` | Focused audit — see PR3 follow-ups below. |
-| Upcoming                        | PR3 | `ios/phase-0-ui` | focused | |
-| All Contacts                    | PR3 | `ios/phase-0-ui` | focused | |
-| Settings                        | PR3 | `ios/phase-0-ui` | focused | |
-| Contact Detail                  | PR3 | `ios/phase-0-ui` | focused | Reached via Contacts → tap first row. |
-| Reminder Windows                | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Reminder windows. |
-| Merge Duplicates                | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Find duplicate contacts. |
-| Transparency                    | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Transparency. |
-| Onboarding                      | PR3 | `ios/phase-0-ui` | focused | Reached via Settings → Onboarding preview. |
+The gate is `ScreensAccessibilityTests.structuralAuditCategories`
+(`elementDetection + sufficientElementDescription + trait`). Sensory findings
+are documented below under *Sensory-audit carve-outs*.
+
+| Screen | PR | Notes |
+|---|---|---|
+| Launch / root placeholder | PR1 (`9501d57`) | One-view smoke — superseded by the Overdue landing check in PR3. |
+| Overdue (landing after splash) | PR3 | Default tab after splash. |
+| Upcoming | PR3 | |
+| All Contacts | PR3 | |
+| Settings | PR3 | |
+| Contact Detail (via Contacts → row) | PR3 | Inline `NavigationLink`. |
+| Contact Detail (via Overdue → row) | PR5 (`ios/phase-0-a11y-tighten`) | Factory-built VM per push. |
+| Contact Detail (via Upcoming → row) | PR5 | Factory-built VM per push. |
+| Reminder Windows | PR3 | Reached via Settings → Reminder windows. |
+| Merge Duplicates | PR3 | Reached via Settings → Find duplicate contacts. |
+| Transparency | PR3 | Reached via Settings → Transparency. |
+| Onboarding | PR3 | Reached via Settings → Onboarding preview. |
 
 ## Sensory-audit carve-outs
 

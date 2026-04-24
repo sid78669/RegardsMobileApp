@@ -225,7 +225,10 @@ public struct ReminderWindowsScreen: View {
                     Spacer()
                     Toggle("", isOn: .constant(window.quietHours != nil))
                         .labelsHidden()
-                        .tint(RegardsDS.accent)
+                        // Matches the active day-pill `accentInk` fill on
+                        // this same screen so the two accent-colored
+                        // controls read as one family.
+                        .tint(RegardsDS.accentInk)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)

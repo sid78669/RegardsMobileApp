@@ -36,7 +36,10 @@ public struct OnboardingScreen: View {
 
                     Button("Why we ask · read the proofs", action: onWhyWeAsk)
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(RegardsDS.accent)
+                        // Sibling to the "Allow contacts access" CTA above —
+                        // body-sized tappable text, so `accentInk` for AA
+                        // against the light background.
+                        .foregroundStyle(RegardsDS.accentInk)
                         .padding(.top, 14)
 
                     Color.clear.frame(height: 40)

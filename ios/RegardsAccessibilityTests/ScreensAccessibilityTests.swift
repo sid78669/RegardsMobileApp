@@ -18,7 +18,7 @@ final class ScreensAccessibilityTests: XCTestCase {
     /// (Avatar initials, Wordmark) and specific accent-color pairings
     /// we've deliberately kept at current brightness for the mock's
     /// visual identity.
-    static let auditCategories: XCUIAccessibilityAuditType = [
+    static let structuralAuditCategories: XCUIAccessibilityAuditType = [
         .elementDetection,
         .sufficientElementDescription,
         .trait,
@@ -33,7 +33,7 @@ final class ScreensAccessibilityTests: XCTestCase {
     @MainActor
     func testOverdueTabPassesAudit() throws {
         let app = launchToOverdue()
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -42,7 +42,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.tabBars.buttons["Upcoming"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.upcoming"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -51,13 +51,13 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.tabBars.buttons["Contacts"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contacts"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
     func testSettingsTabPassesAudit() throws {
         let app = launchToSettings()
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     // MARK: - Pushed screens
@@ -68,7 +68,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.reminder-windows"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.reminder-windows"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -77,7 +77,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.find-duplicate-contacts"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.merge-duplicates"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -86,7 +86,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.transparency"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.transparency"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -95,7 +95,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.onboarding-preview"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.onboarding"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     @MainActor
@@ -109,7 +109,86 @@ final class ScreensAccessibilityTests: XCTestCase {
         firstRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.auditCategories)
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
+    }
+
+    /// Exercises the factory-built Contact Detail push from the **Overdue
+    /// tab** (the new nav-path flow) — the previous ContactDetail test only
+    /// covers the inline `NavigationLink` flow in `AllContactsScreen`.
+    @MainActor
+    func testContactDetailFromOverduePassesAudit() throws {
+        let app = launchToOverdue()
+        // Target contact-row elements specifically — `screen.overdue` also
+        // hosts the nav-bar "All" button and the segmented-control
+        // buttons, so plain `.descendants(matching: .button).firstMatch`
+        // catches those first instead of a row. The row button applies
+        // `.accessibilityElement(children: .ignore)` which composes a
+        // synthetic element whose XCUI elementType resolves to `.other`,
+        // so we search across all element types by identifier.
+        let firstRow = app.descendants(matching: .any)
+            .matching(identifier: "overdue.row").firstMatch
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
+        firstRow.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
+                        .waitForExistence(timeout: 10))
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
+    }
+
+    /// Same path, Upcoming tab.
+    @MainActor
+    func testContactDetailFromUpcomingPassesAudit() throws {
+        let app = launchToOverdue()
+        app.tabBars.buttons["Upcoming"].tap()
+        let upcoming = app.descendants(matching: .any)["screen.upcoming"]
+        XCTAssertTrue(upcoming.waitForExistence(timeout: 10))
+        let firstRow = app.descendants(matching: .any)
+            .matching(identifier: "upcoming.row").firstMatch
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
+        firstRow.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
+                        .waitForExistence(timeout: 10))
+        try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
+    }
+
+    /// Regression guard for the per-push VM factory: tapping two different
+    /// contacts in succession must show the second contact's data, not the
+    /// first's. Guards against a future refactor that accidentally reuses
+    /// the view's identity across pushes.
+    @MainActor
+    func testOverdueNavigationShowsDistinctContacts() throws {
+        let app = launchToOverdue()
+        let overdue = app.descendants(matching: .any)["screen.overdue"]
+        let rows = app.descendants(matching: .any).matching(identifier: "overdue.row")
+
+        // Tap first row → read the hero header → pop back.
+        let first = rows.element(boundBy: 0)
+        XCTAssertTrue(first.waitForExistence(timeout: 10))
+        first.tap()
+        let firstDetail = app.descendants(matching: .any)["screen.contact-detail"]
+        XCTAssertTrue(firstDetail.waitForExistence(timeout: 10))
+        // The hero header text is the only `staticText` child with an
+        // `.isHeader` trait on this screen.
+        let firstName = firstDetail.staticTexts
+            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .firstMatch.label
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        // Tap second row → its hero header should differ.
+        XCTAssertTrue(overdue.waitForExistence(timeout: 10))
+        let second = rows.element(boundBy: 1)
+        XCTAssertTrue(second.waitForExistence(timeout: 10))
+        second.tap()
+        let secondDetail = app.descendants(matching: .any)["screen.contact-detail"]
+        XCTAssertTrue(secondDetail.waitForExistence(timeout: 10))
+        let secondName = secondDetail.staticTexts
+            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .firstMatch.label
+
+        XCTAssertNotEqual(
+            firstName,
+            secondName,
+            "Contact Detail must rebuild its VM per push so two consecutive taps show different contacts."
+        )
     }
 
     // MARK: - Helpers
