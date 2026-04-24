@@ -24,6 +24,13 @@ public struct Avatar: View {
             Circle()
                 .fill(tone.background)
                 .frame(width: size, height: size)
+            // Initials size is intentionally fixed — the audit's
+            // dynamic-type check flags this, but scaling the text inside
+            // a fixed-diameter circle clips at accessibility tiers
+            // regardless of `minimumScaleFactor`. Avatar is
+            // `.accessibilityHidden(true)`; parent rows own the VoiceOver
+            // label, and the visible letters are purely decorative. Noted
+            // as a known trade-off in `ios/docs/accessibility.md`.
             Text(initials)
                 .font(.system(size: size * 0.38, weight: .medium))
                 .foregroundStyle(tone.foreground)

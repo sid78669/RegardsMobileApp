@@ -137,7 +137,8 @@ public struct OnboardingScreen: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                // `accentInk` so the white headline passes AA body contrast.
+                .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityHint("Opens the system Contacts permission prompt.")

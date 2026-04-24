@@ -52,7 +52,9 @@ public struct ContactDetailScreen: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit", action: onTapEdit)
-                    .foregroundStyle(RegardsDS.accent)
+                    // `accentInk` (darker) passes AA body contrast on the
+                    // system nav bar surface; `accent` measures ~3.7:1.
+                    .foregroundStyle(RegardsDS.accentInk)
             }
         }
         .task { await viewModel.load() }
@@ -86,7 +88,8 @@ public struct ContactDetailScreen: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            // `accentInk` so the white headline passes AA body contrast.
+            .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Open \(contact.preferredChannel.displayName) with \(contact.displayName)")

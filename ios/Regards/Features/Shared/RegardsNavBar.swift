@@ -24,7 +24,7 @@ public struct RegardsNavBar: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 if showWordmark {
-                    Wordmark(size: 17, color: RegardsDS.accent)
+                    Wordmark(size: 17, color: RegardsDS.accentInk)
                 } else {
                     Spacer().frame(height: 17)
                 }
@@ -41,7 +41,7 @@ public struct RegardsNavBar: View {
                         } label: {
                             Text(rightAction.text)
                                 .font(.body)
-                                .foregroundStyle(RegardsDS.accent)
+                                .foregroundStyle(RegardsDS.accentInk)
                         }
                     } else {
                         Text(rightAction.text)
