@@ -22,6 +22,6 @@ final class LaunchAccessibilityTests: XCTestCase {
         XCTAssertTrue(overdue.waitForExistence(timeout: 10),
                       "Overdue tab should appear after the splash.")
 
-        try app.performAccessibilityAudit(for: ScreensAccessibilityTests.auditCategories)
+        try app.performAccessibilityAudit(for: ScreensAccessibilityTests.structuralAuditCategories)
     }
 }

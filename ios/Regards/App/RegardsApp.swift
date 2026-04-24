@@ -105,6 +105,9 @@ struct RegardsTabRoot: View {
                 .navigationDestination(for: UUID.self) { contactId in
                     contactDetail(for: contactId)
                 }
+                .navigationDestination(for: Contact.self) { contact in
+                    EditContactScreen(contact: contact)
+                }
             }
             .tabItem { Label("Overdue", systemImage: "exclamationmark.circle") }
             .tag(Tab.overdue)
@@ -119,12 +122,19 @@ struct RegardsTabRoot: View {
                 .navigationDestination(for: UUID.self) { contactId in
                     contactDetail(for: contactId)
                 }
+                .navigationDestination(for: Contact.self) { contact in
+                    EditContactScreen(contact: contact)
+                }
             }
             .tabItem { Label("Upcoming", systemImage: "calendar") }
             .tag(Tab.upcoming)
 
             NavigationStack {
                 AllContactsScreen(env: env)
+                    // Contact Detail → Edit push from this tab too.
+                    .navigationDestination(for: Contact.self) { contact in
+                        EditContactScreen(contact: contact)
+                    }
             }
             .tabItem { Label("Contacts", systemImage: "person.2") }
             .tag(Tab.contacts)
