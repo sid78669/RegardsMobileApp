@@ -36,7 +36,10 @@ public struct OnboardingScreen: View {
 
                     Button("Why we ask · read the proofs", action: onWhyWeAsk)
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(RegardsDS.accent)
+                        // Sibling to the "Allow contacts access" CTA above —
+                        // body-sized tappable text, so `accentInk` for AA
+                        // against the light background.
+                        .foregroundStyle(RegardsDS.accentInk)
                         .padding(.top, 14)
 
                     Color.clear.frame(height: 40)
@@ -137,7 +140,8 @@ public struct OnboardingScreen: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                // `accentInk` so the white headline passes AA body contrast.
+                .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityHint("Opens the system Contacts permission prompt.")

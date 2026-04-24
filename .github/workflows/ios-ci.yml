@@ -130,12 +130,7 @@ jobs:
           name: RegardsAccessibilityTests.xcresult
           path: ios/build/RegardsAccessibilityTests.xcresult
 
-  # PR3 wires in snapshot tests once swift-snapshot-testing lands. Placeholder
-  # job kept here so branch protection can reference it by name from day 1.
-  snapshot-tests:
-    name: Snapshot tests (PR3+)
-    runs-on: macos-latest
-    needs: build
-    if: false
-    steps:
-      - run: echo "Populated in PR3"
+  # Snapshot tests (swift-snapshot-testing) are deferred out of Phase 0.
+  # The a11y audit + manual VoiceOver smoke (`ios/docs/accessibility-smoke.md`)
+  # gate the UI shell today; snapshotting lands when we have a real design
+  # pass and baseline images are worth maintaining.

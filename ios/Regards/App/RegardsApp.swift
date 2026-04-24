@@ -79,6 +79,10 @@ struct RegardsTabRoot: View {
     @State private var selected: Tab = .overdue
     @State private var overdueVM: OverdueViewModel
     @State private var upcomingVM: UpcomingViewModel
+    // Per-tab navigation paths so a push inside Overdue doesn't leak into
+    // Upcoming, and tab-switching preserves the stack state per tab.
+    @State private var overduePath = NavigationPath()
+    @State private var upcomingPath = NavigationPath()
 
     enum Tab: Hashable { case overdue, upcoming, contacts, settings }
 
@@ -90,30 +94,47 @@ struct RegardsTabRoot: View {
 
     var body: some View {
         TabView(selection: $selected) {
-            NavigationStack {
+            NavigationStack(path: $overduePath) {
                 OverdueScreen(
                     viewModel: overdueVM,
                     upcomingCount: upcomingVM.totalCount,
-                    onTapContact: { _ in },
+                    onTapContact: { contactId in overduePath.append(contactId) },
                     onTapChannel: { _ in },
                     onSwitchToUpcoming: { selected = .upcoming }
                 )
+                .navigationDestination(for: UUID.self) { contactId in
+                    contactDetail(for: contactId)
+                }
+                .navigationDestination(for: Contact.self) { contact in
+                    EditContactScreen(contact: contact)
+                }
             }
             .tabItem { Label("Overdue", systemImage: "exclamationmark.circle") }
             .tag(Tab.overdue)
 
-            NavigationStack {
+            NavigationStack(path: $upcomingPath) {
                 UpcomingScreen(
                     viewModel: upcomingVM,
                     overdueCount: overdueVM.overdueCount,
+                    onTapContact: { contactId in upcomingPath.append(contactId) },
                     onSwitchToOverdue: { selected = .overdue }
                 )
+                .navigationDestination(for: UUID.self) { contactId in
+                    contactDetail(for: contactId)
+                }
+                .navigationDestination(for: Contact.self) { contact in
+                    EditContactScreen(contact: contact)
+                }
             }
             .tabItem { Label("Upcoming", systemImage: "calendar") }
             .tag(Tab.upcoming)
 
             NavigationStack {
                 AllContactsScreen(env: env)
+                    // Contact Detail → Edit push from this tab too.
+                    .navigationDestination(for: Contact.self) { contact in
+                        EditContactScreen(contact: contact)
+                    }
             }
             .tabItem { Label("Contacts", systemImage: "person.2") }
             .tag(Tab.contacts)
@@ -124,7 +145,11 @@ struct RegardsTabRoot: View {
             .tabItem { Label("Settings", systemImage: "gearshape") }
             .tag(Tab.settings)
         }
-        .tint(RegardsDS.accent)
+        // `accentInk` (darker warm) rather than `accent` (lighter terracotta)
+        // so tab-bar icon + label contrast passes AA against the tab bar's
+        // translucent system surface — `accent` on that surface measures
+        // ~3.4:1, below body-text AA. `accentInk` is ~8:1.
+        .tint(RegardsDS.accentInk)
         // Kick off both VMs up-front so the cross-tab counters on the
         // segmented control (Overdue shows upcomingCount, Upcoming shows
         // overdueCount) are populated at launch — otherwise the opposite
@@ -134,6 +159,21 @@ struct RegardsTabRoot: View {
             async let upcomingLoad: Void = upcomingVM.load()
             _ = await (overdueLoad, upcomingLoad)
         }
+    }
+
+    /// Factory for a Contact Detail destination. A fresh VM is created per
+    /// push so navigating two different contacts in a row shows the right
+    /// data (relying on SwiftUI view identity alone would recycle the old
+    /// VM).
+    @ViewBuilder
+    private func contactDetail(for contactId: UUID) -> some View {
+        ContactDetailScreen(
+            viewModel: ContactDetailViewModel(
+                contactId: contactId,
+                contacts: env.contacts,
+                interactionsRepo: env.interactions
+            )
+        )
     }
 }
 

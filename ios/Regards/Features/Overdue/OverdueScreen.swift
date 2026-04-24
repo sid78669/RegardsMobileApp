@@ -177,6 +177,11 @@ struct OverdueRow: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(row.accessibilityLabel)
             .accessibilityHint("Double-tap to open contact detail.")
+            // Stable identifier for UI tests that need to target a
+            // contact-row tap specifically (vs. the nav-bar "All"
+            // button or the segmented-control buttons that also
+            // live on this screen).
+            .accessibilityIdentifier("overdue.row")
 
             channelPill
         }
@@ -212,7 +217,10 @@ struct OverdueRow: View {
             }
             .padding(.horizontal, 12)
             .frame(minHeight: 44)
-            .background(Capsule().fill(RegardsDS.accent))
+            // `accentInk` bg for white body text — passes AA body contrast.
+            // Lighter `accent` on "WhatsApp" at `.footnote.weight(.semibold)`
+            // measures ~3.7:1 (small text, fails AA body).
+            .background(Capsule().fill(RegardsDS.accentInk))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Open \(row.channelLabel)")

@@ -70,7 +70,10 @@ public struct TransparencyScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        // `accentInk` (darker) instead of `accent` so white body copy passes
+        // AA body contrast — white-on-accent measures ~3.7:1 (fails body AA);
+        // white-on-accentInk measures ~8:1.
+        .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var proofsSection: some View {
@@ -175,7 +178,7 @@ public struct TransparencyScreen: View {
                     .foregroundStyle(RegardsDS.ink)
                 Text(detail)
                     .font(RegardsFont.mono(.caption))
-                    .foregroundStyle(isAccent ? RegardsDS.accent : RegardsDS.muted)
+                    .foregroundStyle(isAccent ? RegardsDS.accentInk : RegardsDS.muted)
             }
             Spacer()
             // Stub — Phase 1 wires these to Safari deep links. Muted until

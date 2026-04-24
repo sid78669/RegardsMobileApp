@@ -17,6 +17,12 @@ public struct ChannelGlyph: View {
     }
 
     public var body: some View {
+        // Decorative glyph — `.accessibilityHidden(true)` means parents
+        // (action pills, row metadata) own the VoiceOver label. Size is
+        // caller-controlled so the glyph fits its pill / row at every
+        // Dynamic Type setting without clipping. The audit's dynamic-type
+        // check flags this as a known trade-off (noted in
+        // `ios/docs/accessibility.md`).
         Image(systemName: Self.symbol(for: channel))
             .font(.system(size: size * 0.95, weight: .regular))
             .foregroundStyle(color)

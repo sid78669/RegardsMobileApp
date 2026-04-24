@@ -2,16 +2,13 @@ import SwiftUI
 
 public struct ContactDetailScreen: View {
     let viewModel: ContactDetailViewModel
-    private let onTapEdit: () -> Void
     private let onTapOpenChannel: () -> Void
     private let onTapMarkCaughtUp: () -> Void
 
     public init(viewModel: ContactDetailViewModel,
-                onTapEdit: @escaping () -> Void = {},
                 onTapOpenChannel: @escaping () -> Void = {},
                 onTapMarkCaughtUp: @escaping () -> Void = {}) {
         self.viewModel = viewModel
-        self.onTapEdit = onTapEdit
         self.onTapOpenChannel = onTapOpenChannel
         self.onTapMarkCaughtUp = onTapMarkCaughtUp
     }
@@ -50,9 +47,19 @@ public struct ContactDetailScreen: View {
         .scrollContentBackground(.hidden)
         .accessibilityIdentifier("screen.contact-detail")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Edit", action: onTapEdit)
-                    .foregroundStyle(RegardsDS.accent)
+            if let contact = viewModel.contact {
+                ToolbarItem(placement: .topBarTrailing) {
+                    // `NavigationLink(value:)` so Edit integrates with
+                    // whichever NavigationStack is hosting this screen —
+                    // the tab root / AllContactsScreen's stack supplies a
+                    // `.navigationDestination(for: Contact.self)` that
+                    // renders `EditContactScreen`. This keeps the push
+                    // idiomatic (no closure plumbing) and the button live.
+                    NavigationLink(value: contact) {
+                        Text("Edit")
+                            .foregroundStyle(RegardsDS.accentInk)
+                    }
+                }
             }
         }
         .task { await viewModel.load() }
@@ -86,7 +93,8 @@ public struct ContactDetailScreen: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            // `accentInk` so the white headline passes AA body contrast.
+            .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Open \(contact.preferredChannel.displayName) with \(contact.displayName)")

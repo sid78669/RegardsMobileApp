@@ -83,7 +83,8 @@ public struct ReminderWindowsScreen: View {
     private func dayPill(letter: String, active: Bool) -> some View {
         ZStack {
             Circle()
-                .fill(active ? RegardsDS.accent : RegardsDS.hairSoft)
+                // `accentInk` so the white day letter passes AA body contrast.
+                .fill(active ? RegardsDS.accentInk : RegardsDS.hairSoft)
                 .frame(width: 36, height: 36)
             Text(letter)
                 .font(.subheadline.weight(.semibold))
@@ -224,7 +225,10 @@ public struct ReminderWindowsScreen: View {
                     Spacer()
                     Toggle("", isOn: .constant(window.quietHours != nil))
                         .labelsHidden()
-                        .tint(RegardsDS.accent)
+                        // Matches the active day-pill `accentInk` fill on
+                        // this same screen so the two accent-colored
+                        // controls read as one family.
+                        .tint(RegardsDS.accentInk)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
