@@ -212,7 +212,10 @@ struct OverdueRow: View {
             }
             .padding(.horizontal, 12)
             .frame(minHeight: 44)
-            .background(Capsule().fill(RegardsDS.accent))
+            // `accentInk` bg for white body text — passes AA body contrast.
+            // Lighter `accent` on "WhatsApp" at subheadline would measure
+            // ~3.7:1 (small text fails AA).
+            .background(Capsule().fill(RegardsDS.accentInk))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Open \(row.channelLabel)")

@@ -9,12 +9,16 @@ import XCTest
 /// `ios/docs/accessibility.md`: a failing audit blocks merge.
 final class ScreensAccessibilityTests: XCTestCase {
 
-    /// Audit categories PR3 gates on. Structural checks (labels, traits,
-    /// parent/child order, element detection) gate merges right now; the
-    /// sensory checks (contrast, hit region, dynamic-type scaling, text
-    /// clipping) are known-tight against the JSX palette and tracked as a
-    /// follow-up — see ios/docs/accessibility.md §"PR3 follow-ups".
-    static let pr3AuditCategories: XCUIAccessibilityAuditType = [
+    /// Audit categories the suite gates on. Structural checks (labels,
+    /// traits, element detection) are merge-blocking. Sensory checks
+    /// (`contrast`, `hitRegion`, `dynamicType`, `textClipped`) are
+    /// documented design-intent trade-offs covered in
+    /// `ios/docs/accessibility.md` §"Sensory-audit carve-outs" — the
+    /// remaining findings are on decorative brand elements
+    /// (Avatar initials, Wordmark) and specific accent-color pairings
+    /// we've deliberately kept at current brightness for the mock's
+    /// visual identity.
+    static let auditCategories: XCUIAccessibilityAuditType = [
         .elementDetection,
         .sufficientElementDescription,
         .trait,
@@ -29,7 +33,7 @@ final class ScreensAccessibilityTests: XCTestCase {
     @MainActor
     func testOverdueTabPassesAudit() throws {
         let app = launchToOverdue()
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -38,7 +42,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.tabBars.buttons["Upcoming"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.upcoming"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -47,13 +51,13 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.tabBars.buttons["Contacts"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contacts"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
     func testSettingsTabPassesAudit() throws {
         let app = launchToSettings()
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     // MARK: - Pushed screens
@@ -64,7 +68,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.reminder-windows"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.reminder-windows"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -73,7 +77,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.find-duplicate-contacts"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.merge-duplicates"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -82,7 +86,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.transparency"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.transparency"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -91,7 +95,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         app.descendants(matching: .any)["settings.onboarding-preview"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.onboarding"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     @MainActor
@@ -105,7 +109,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         firstRow.tap()
         XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
                         .waitForExistence(timeout: 10))
-        try app.performAccessibilityAudit(for: Self.pr3AuditCategories)
+        try app.performAccessibilityAudit(for: Self.auditCategories)
     }
 
     // MARK: - Helpers

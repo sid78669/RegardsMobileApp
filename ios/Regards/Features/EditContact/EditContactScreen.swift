@@ -40,7 +40,7 @@ public struct EditContactScreen: View {
     private var header: some View {
         HStack {
             Button("Cancel", action: onCancel)
-                .foregroundStyle(RegardsDS.accent)
+                .foregroundStyle(RegardsDS.accentInk)
             Spacer()
             Text("Edit Contact")
                 .font(.headline)
@@ -48,7 +48,7 @@ public struct EditContactScreen: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer()
             Button("Save", action: onSave)
-                .foregroundStyle(RegardsDS.accent)
+                .foregroundStyle(RegardsDS.accentInk)
                 .font(.body.weight(.semibold))
         }
         .padding(.horizontal, 20)

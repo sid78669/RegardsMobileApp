@@ -124,7 +124,8 @@ struct CandidateCard: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 40)
                     .background(
-                        state.isSelected ? RegardsDS.accent : RegardsDS.hairSoft,
+                        // `accentInk` so the white headline passes AA body contrast.
+                        state.isSelected ? RegardsDS.accentInk : RegardsDS.hairSoft,
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous)
                     )
             }
@@ -153,7 +154,7 @@ struct CandidateCard: View {
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Capsule().fill(RegardsDS.accent))
+                            .background(Capsule().fill(RegardsDS.accentInk))
                             .offset(x: 10, y: -6)
                     }
                 }

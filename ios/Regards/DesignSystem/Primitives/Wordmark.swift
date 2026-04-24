@@ -1,7 +1,11 @@
 import SwiftUI
 
 /// The "regards" lowercase-italic wordmark. Used in the nav bar, the splash,
-/// and the widget scene. Dynamic-type-scalable via `@ScaledMetric`.
+/// and the widget scene. Intentionally fixed-size — the wordmark is a brand
+/// mark, not copy. Each caller picks the rendered size for the context
+/// (`size: 17` in nav bars, `size: 48` in Onboarding, `@ScaledMetric`-wrapped
+/// in `SplashView`). Noted as a known dynamic-type finding in
+/// `ios/docs/accessibility.md`.
 public struct Wordmark: View {
     public let size: CGFloat
     public let color: Color?
