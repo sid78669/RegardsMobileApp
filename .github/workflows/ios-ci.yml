@@ -55,12 +55,16 @@ jobs:
           xcode-version: ${{ env.XCODE_VERSION }}
       - name: Build
         working-directory: ios
+        # `generic/platform=iOS Simulator` is the buildable placeholder —
+        # it resolves against the Xcode-bundled iOS Simulator SDK without
+        # requiring a downloaded runtime. The test jobs need a real
+        # runtime; this one doesn't, so don't pay for one.
         run: |
           set -o pipefail
           xcodebuild \
             -project Regards.xcodeproj \
             -scheme "$SCHEME" \
-            -destination "$SIMULATOR" \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -77,6 +81,11 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
+      # GitHub's macos-latest image (Xcode 16.2 / macOS 15) doesn't ship
+      # an iOS Simulator runtime — `xcrun simctl list` shows only the
+      # placeholder. Tests need a real bootable runtime, so install one.
+      - name: Install iOS Simulator runtime
+        run: xcodebuild -downloadPlatform iOS
       - name: Run RegardsTests
         working-directory: ios
         run: |
@@ -110,6 +119,8 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Install iOS Simulator runtime
+        run: xcodebuild -downloadPlatform iOS
       - name: Run RegardsAccessibilityTests
         working-directory: ios
         run: |
