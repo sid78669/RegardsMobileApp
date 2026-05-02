@@ -17,10 +17,11 @@ concurrency:
 
 env:
   XCODE_VERSION: "16.2"
-  # No device name pinned — picks whatever iPhone simulator the runner image
-  # ships. GitHub trims the simulator catalog aggressively (April 2026's
-  # macos-latest image has no `iPhone 15`), so a name pin is brittle.
-  SIMULATOR: "platform=iOS Simulator,OS=latest"
+  # `OS=latest` alone doesn't pick a device — xcodebuild needs a name to
+  # disambiguate. iPhone 16 Pro is the current flagship in GitHub's
+  # macos-latest image (Xcode 16.2 / macOS 15) and resolves to iOS 18.6
+  # under `OS=latest`. iPhone 15 (the previous pin) is no longer shipped.
+  SIMULATOR: "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest"
   SCHEME: Regards
 
 jobs:
