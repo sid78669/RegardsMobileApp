@@ -17,7 +17,10 @@ concurrency:
 
 env:
   XCODE_VERSION: "16.2"
-  SIMULATOR: "platform=iOS Simulator,name=iPhone 15,OS=latest"
+  # No device name pinned — picks whatever iPhone simulator the runner image
+  # ships. GitHub trims the simulator catalog aggressively (April 2026's
+  # macos-latest image has no `iPhone 15`), so a name pin is brittle.
+  SIMULATOR: "platform=iOS Simulator,OS=latest"
   SCHEME: Regards
 
 jobs:
@@ -63,7 +66,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             build \
-            | xcbeautify --renderer github-actions || true
+            | xcbeautify --renderer github-actions
 
   unit-tests:
     name: Unit tests + coverage
@@ -90,7 +93,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             test \
-            | xcbeautify --renderer github-actions || true
+            | xcbeautify --renderer github-actions
       - name: Upload xcresult
         if: always()
         uses: actions/upload-artifact@v4
@@ -122,7 +125,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             test \
-            | xcbeautify --renderer github-actions || true
+            | xcbeautify --renderer github-actions
       - name: Upload xcresult
         if: always()
         uses: actions/upload-artifact@v4
