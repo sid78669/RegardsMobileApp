@@ -217,9 +217,5 @@ struct OverdueRow: View {
         .buttonStyle(.plain)
         .accessibilityLabel("Open \(row.channelLabel)")
         .accessibilityHint("Opens \(row.channelLabel) with \(row.name).")
-        // VERIFICATION ROUND-TRIP — interactive button hidden from a11y;
-        // expected to trip the audit's elementDetection check. Reverted in
-        // the next commit on this branch.
-        .accessibilityHidden(true)
     }
 }
