@@ -53,12 +53,18 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
+      # GitHub's macos-latest image (Xcode 16.2 / macOS 15) installs Xcode
+      # without the iOS platform — `xcodebuild -showdestinations` reports
+      # "iOS 18.2 is not installed". Even building against the iOS
+      # Simulator SDK requires the platform; install before any xcodebuild
+      # step that targets iOS.
+      - name: Install iOS platform
+        run: xcodebuild -downloadPlatform iOS
       - name: Build
         working-directory: ios
-        # `generic/platform=iOS Simulator` is the buildable placeholder —
-        # it resolves against the Xcode-bundled iOS Simulator SDK without
-        # requiring a downloaded runtime. The test jobs need a real
-        # runtime; this one doesn't, so don't pay for one.
+        # `generic/platform=iOS Simulator` resolves against the SDK
+        # without booting a device — fine for `build`, since we only need
+        # the artifacts. Test jobs use the bootable destination instead.
         run: |
           set -o pipefail
           xcodebuild \
@@ -81,10 +87,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-      # GitHub's macos-latest image (Xcode 16.2 / macOS 15) doesn't ship
-      # an iOS Simulator runtime — `xcrun simctl list` shows only the
-      # placeholder. Tests need a real bootable runtime, so install one.
-      - name: Install iOS Simulator runtime
+      - name: Install iOS platform
         run: xcodebuild -downloadPlatform iOS
       - name: Run RegardsTests
         working-directory: ios
@@ -119,7 +122,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
-      - name: Install iOS Simulator runtime
+      - name: Install iOS platform
         run: xcodebuild -downloadPlatform iOS
       - name: Run RegardsAccessibilityTests
         working-directory: ios
