@@ -60,7 +60,23 @@ jobs:
       # Simulator SDK requires the platform; install before any xcodebuild
       # step that targets iOS.
       - name: Install iOS platform
-        run: xcodebuild -downloadPlatform iOS
+        # Wrap in a retry loop — `xcodebuild -downloadPlatform iOS`
+        # intermittently fails with "Unable to connect to simulator"
+        # against Apple's CDN (observed twice in 24h on the macos-latest
+        # image). Three attempts with 15s backoff has been enough each
+        # time. No-op cost when healthy.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            if xcodebuild -downloadPlatform iOS; then
+              [ "$attempt" -gt 1 ] && echo "downloadPlatform succeeded on attempt $attempt (after retries)"
+              exit 0
+            fi
+            echo "::warning::downloadPlatform failed on attempt $attempt; sleeping 15s before retry"
+            sleep 15
+          done
+          echo "::error::xcodebuild -downloadPlatform iOS failed after 3 attempts"
+          exit 1
       - name: Build
         working-directory: ios
         # `generic/platform=iOS Simulator` resolves against the SDK
@@ -89,7 +105,23 @@ jobs:
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
       - name: Install iOS platform
-        run: xcodebuild -downloadPlatform iOS
+        # Wrap in a retry loop — `xcodebuild -downloadPlatform iOS`
+        # intermittently fails with "Unable to connect to simulator"
+        # against Apple's CDN (observed twice in 24h on the macos-latest
+        # image). Three attempts with 15s backoff has been enough each
+        # time. No-op cost when healthy.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            if xcodebuild -downloadPlatform iOS; then
+              [ "$attempt" -gt 1 ] && echo "downloadPlatform succeeded on attempt $attempt (after retries)"
+              exit 0
+            fi
+            echo "::warning::downloadPlatform failed on attempt $attempt; sleeping 15s before retry"
+            sleep 15
+          done
+          echo "::error::xcodebuild -downloadPlatform iOS failed after 3 attempts"
+          exit 1
       - name: Run RegardsTests
         working-directory: ios
         run: |
@@ -124,7 +156,23 @@ jobs:
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
       - name: Install iOS platform
-        run: xcodebuild -downloadPlatform iOS
+        # Wrap in a retry loop — `xcodebuild -downloadPlatform iOS`
+        # intermittently fails with "Unable to connect to simulator"
+        # against Apple's CDN (observed twice in 24h on the macos-latest
+        # image). Three attempts with 15s backoff has been enough each
+        # time. No-op cost when healthy.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            if xcodebuild -downloadPlatform iOS; then
+              [ "$attempt" -gt 1 ] && echo "downloadPlatform succeeded on attempt $attempt (after retries)"
+              exit 0
+            fi
+            echo "::warning::downloadPlatform failed on attempt $attempt; sleeping 15s before retry"
+            sleep 15
+          done
+          echo "::error::xcodebuild -downloadPlatform iOS failed after 3 attempts"
+          exit 1
       - name: Run RegardsAccessibilityTests
         working-directory: ios
         run: |
