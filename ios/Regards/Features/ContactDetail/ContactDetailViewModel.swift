@@ -38,7 +38,15 @@ public final class ContactDetailViewModel {
         do {
             contact = try await contacts.fetch(id: contactId)
             let logs = try await interactionsRepo.fetchRecent(forContact: contactId, limit: 8)
-            interactions = logs.map(Self.toEntry)
+            // `logs.map(Self.toEntry)` would pass a `@MainActor`-isolated
+            // function reference into `Array.map`'s nonisolated parameter
+            // type — Swift 6 strict concurrency rejects it. The `for` loop
+            // stays on the enclosing MainActor and calls `toEntry`
+            // directly, no isolation crossing.
+            var entries: [InteractionEntry] = []
+            entries.reserveCapacity(logs.count)
+            for log in logs { entries.append(Self.toEntry(log)) }
+            interactions = entries
         } catch {
             Self.log.error("failed to load contact \(self.contactId, privacy: .public): \(error, privacy: .public)")
             contact = nil
