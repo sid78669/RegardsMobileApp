@@ -43,7 +43,7 @@ struct RepositoriesTests {
         #expect(result.map(\.id) == [tracked.id])
     }
 
-    @Test("fetchMembers returns only contacts with the given contactGroupId")
+    @Test("fetchMembers returns contacts in the group, including archived ones")
     func fetchMembersByGroup() async throws {
         let queue = try DatabaseFactory.makeInMemoryDatabase()
         let repos = GRDBRepositories(dbQueue: queue)
@@ -61,34 +61,46 @@ struct RepositoriesTests {
             createdBy: .user)
         try await repos.groups.upsert(group)
 
-        let member1 = Contact(
+        let activeMember = Contact(
             systemContactRef: "sys-mom-personal-2",
             displayName: "Mom (work)",
-            contactGroupId: group.id,
             preferredChannel: .email,
-            preferredChannelValue: "")
-        let member2 = Contact(
+            preferredChannelValue: "",
+            contactGroupId: group.id)
+        let archivedMember = Contact(
             systemContactRef: "sys-mom-whatsapp",
-            displayName: "Mom (WhatsApp)",
-            contactGroupId: group.id,
+            displayName: "Mom (WhatsApp, deleted from system contacts)",
             preferredChannel: .whatsapp,
-            preferredChannelValue: "+15555550201")
+            preferredChannelValue: "+15555550201",
+            contactGroupId: group.id)
         let unrelated = Contact(
             systemContactRef: "sys-other",
             displayName: "Not Mom",
             preferredChannel: .phoneCall,
             preferredChannelValue: "+15555550999")
 
-        // Set the group reference on the primary too, so all 3 are members.
+        // Set the group reference on the primary too, so all 3 group rows
+        // (primary + active + archived) carry the group id.
         var primaryWithGroup = primary
         primaryWithGroup.contactGroupId = group.id
         try await repos.contacts.upsert(primaryWithGroup)
-        try await repos.contacts.upsert(member1)
-        try await repos.contacts.upsert(member2)
+        try await repos.contacts.upsert(activeMember)
+        try await repos.contacts.upsert(archivedMember)
         try await repos.contacts.upsert(unrelated)
 
+        // Archive one member after-the-fact. Per the ContactRepository
+        // contract, fetchMembers still returns it. Archival doesn't silently
+        // change group membership; callers filter `isActive` if they want
+        // active-only.
+        try await repos.contacts.archive(
+            id: archivedMember.id,
+            at: Date(timeIntervalSince1970: 1_800_000_000))
+
         let members = try await repos.contacts.fetchMembers(ofGroup: group.id)
-        #expect(Set(members.map(\.id)) == Set([primary.id, member1.id, member2.id]))
+        #expect(Set(members.map(\.id)) == Set([primary.id, activeMember.id, archivedMember.id]))
+
+        // And the archived row really is archived in the result.
+        #expect(members.first(where: { $0.id == archivedMember.id })?.isActive == false)
     }
 
     @Test("archive sets archivedAt; fetch by id still returns the row")
@@ -147,7 +159,7 @@ struct RepositoriesTests {
 
     // MARK: - ReminderRepository
 
-    @Test("fetchPending(forContact:) filters by contact and ignores fired reminders")
+    @Test("fetchPending(forContact:) filters by contact, ignores fired, orders by scheduledFor ascending")
     func fetchPendingByContact() async throws {
         let queue = try DatabaseFactory.makeInMemoryDatabase()
         let repos = GRDBRepositories(dbQueue: queue)
@@ -167,25 +179,33 @@ struct RepositoriesTests {
         try await repos.contacts.upsert(alex)
         try await repos.contacts.upsert(jordan)
 
-        let alexPending = ScheduledReminder(
+        // Two pending for Alex (out-of-order insert), one fired for Alex,
+        // one pending for Jordan. Result for Alex must be the two pendings
+        // in ascending `scheduledFor` order.
+        let alexLater = ScheduledReminder(
+            contactId: alex.id, kind: .cadence,
+            scheduledFor: Date(timeIntervalSince1970: 1_900_000_000),
+            osNotificationId: "n-alex-later")
+        let alexSooner = ScheduledReminder(
             contactId: alex.id, kind: .cadence,
             scheduledFor: Date(timeIntervalSince1970: 1_800_000_000),
-            osNotificationId: "n-alex-1")
+            osNotificationId: "n-alex-sooner")
         let alexFired = ScheduledReminder(
             contactId: alex.id, kind: .cadence,
             scheduledFor: Date(timeIntervalSince1970: 1_700_000_000),
-            osNotificationId: "n-alex-2", state: .fired)
+            osNotificationId: "n-alex-fired", state: .fired)
         let jordanPending = ScheduledReminder(
             contactId: jordan.id, kind: .birthday,
             occasionDate: "06-15", occasionLabel: "Birthday",
-            scheduledFor: Date(timeIntervalSince1970: 1_900_000_000),
+            scheduledFor: Date(timeIntervalSince1970: 1_950_000_000),
             osNotificationId: "n-jordan-1")
-        try await repos.reminders.upsert(alexPending)
+        try await repos.reminders.upsert(alexLater)
+        try await repos.reminders.upsert(alexSooner)
         try await repos.reminders.upsert(alexFired)
         try await repos.reminders.upsert(jordanPending)
 
         let alexResult = try await repos.reminders.fetchPending(forContact: alex.id)
-        #expect(alexResult.map(\.id) == [alexPending.id])
+        #expect(alexResult.map(\.id) == [alexSooner.id, alexLater.id])
 
         let jordanResult = try await repos.reminders.fetchPending(forContact: jordan.id)
         #expect(jordanResult.map(\.id) == [jordanPending.id])
@@ -292,14 +312,14 @@ struct RepositoriesTests {
         #expect(seeded.allowedTimeRanges.isEmpty == false)
 
         let updated = ReminderWindow(
-            allowedDays: .all,
+            allowedDays: .allDays,
             allowedTimeRanges: [TimeRange(start: TimeOfDay(hour: 9), end: TimeOfDay(hour: 10))],
             quietHours: nil,
             timezoneIdentifier: "America/Los_Angeles")
         try await repo.saveGlobal(updated)
 
         let reloaded = try await repo.fetchGlobal()
-        #expect(reloaded.allowedDays == .all)
+        #expect(reloaded.allowedDays == .allDays)
         #expect(reloaded.allowedTimeRanges.count == 1)
         #expect(reloaded.timezoneIdentifier == "America/Los_Angeles")
         #expect(reloaded.quietHours == nil)

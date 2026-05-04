@@ -10,6 +10,11 @@ public protocol ContactRepository: Sendable {
     func fetchAll() async throws -> [Contact]
     func fetchTracked() async throws -> [Contact]
     func fetch(id: UUID) async throws -> Contact?
+    /// Returns every contact whose `contactGroupId` matches `groupId`,
+    /// **including archived members**. ContactGroup is a virtual merge target
+    /// (ARCHITECTURE.md §7); archival is a contact-level concept and does not
+    /// silently change group membership. Callers that want active-only
+    /// members filter on `isActive` themselves.
     func fetchMembers(ofGroup groupId: UUID) async throws -> [Contact]
     func upsert(_ contact: Contact) async throws
     func archive(id: UUID, at: Date) async throws
@@ -105,6 +110,9 @@ struct GRDBContactRepository: ContactRepository {
         }
     }
 
+    /// Stamps `archivedAt` as integer epoch seconds. Sub-second precision on
+    /// the input `Date` is dropped silently; the schema stores every Date
+    /// column the same way (see `Records.swift` and ARCHITECTURE.md §7).
     func archive(id: UUID, at: Date) async throws {
         try await dbQueue.write { db in
             try db.execute(
@@ -159,6 +167,7 @@ struct GRDBReminderRepository: ReminderRepository {
             try ScheduledReminderRecord
                 .filter(Column("contactId") == contactId.uuidString
                         && Column("state") == ReminderState.pending.rawValue)
+                .order(Column("scheduledFor"))
                 .fetchAll(db)
                 .map { try $0.toDomain() }
         }
