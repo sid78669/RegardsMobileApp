@@ -39,7 +39,7 @@ public enum Channel: String, CaseIterable, Codable, Sendable, Hashable {
         }
     }
 
-    /// Whether this channel is available on iOS. (`facetime` is iOS-only; the
-    /// Kotlin port hides it on Android — see §8.)
+    /// Whether this channel is available on iOS. (Always true here — the
+    /// catalog only lists iOS-supported channels; see §8.)
     public var isAvailableOnIOS: Bool { true }
 }

@@ -1,8 +1,7 @@
 import Foundation
 
 /// Static metadata describing how each channel is validated and deep-linked
-/// (ARCHITECTURE.md §8). The Android columns in the doc are informational
-/// only in the iOS repo — the Kotlin port will mirror this file.
+/// (ARCHITECTURE.md §8).
 public enum ChannelValueKind: Sendable, Equatable {
     case phoneE164
     case phoneOrEmail

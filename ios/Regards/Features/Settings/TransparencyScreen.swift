@@ -52,19 +52,19 @@ public struct TransparencyScreen: View {
     // a `Text(...)` was tipping Swift's type-checker into "unable to type-
     // check this expression in reasonable time" on the claimCard view.
     private static let claimBody: String = """
-        On Android the guarantee is kernel-enforced: the manifest omits \
-        the INTERNET permission, so the OS denies the app a network \
-        socket no matter what the code does. On iOS there is no \
-        equivalent permission to withhold — any app can open sockets — \
-        so the guarantee is source-auditable instead: the app's source \
-        has zero call sites to URLSession, NWConnection, CFReadStream, \
-        or similar, and CI fails the build the moment one appears. \
-        Pull the source, grep it, rebuild the binary yourself.
+        Any iOS app can open a socket — there's no permission to \
+        withhold — so the guarantee is source-auditable instead. The \
+        app's source has zero call sites to URLSession, NWConnection, \
+        CFReadStream, URLRequest, or similar networking primitives. \
+        CI greps every PR and fails the build the moment one appears. \
+        App Transport Security is a second fence underneath, set to \
+        deny all loads. Pull the source, grep it, rebuild the binary \
+        yourself.
         """
 
     private var claimCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("No call-home. Android enforces it; iOS makes it auditable.")
+            Text("No call-home. Source-auditable, end to end.")
                 .font(.system(.title, design: .serif).italic())
                 .foregroundStyle(.white)
                 .lineSpacing(3)
@@ -75,7 +75,10 @@ public struct TransparencyScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .background(RegardsDS.accent, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        // `accentInk` (darker) instead of `accent` so white body copy passes
+        // AA body contrast — white-on-accent measures ~3.7:1 (fails body AA);
+        // white-on-accentInk measures ~8:1.
+        .background(RegardsDS.accentInk, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var proofsSection: some View {
@@ -84,15 +87,7 @@ public struct TransparencyScreen: View {
             RegardsCard {
                 VStack(spacing: 0) {
                     proofRow(
-                        label: "Android: no INTERNET permission (kernel-enforced)",
-                        status: "AndroidManifest.xml declares zero network permissions. "
-                              + "Without INTERNET the OS denies socket creation to this app's UID — "
-                              + "network access is impossible, not just policy-forbidden.",
-                        value: "<manifest> … no <uses-permission …INTERNET /> …"
-                    )
-                    Hair(inset: 16)
-                    proofRow(
-                        label: "iOS: zero networking call sites (source-auditable)",
+                        label: "Zero networking call sites (source-auditable)",
                         status: "Foundation itself is of course linked — that's not the claim. "
                               + "The claim is that the app's source code contains no calls to "
                               + "URLSession, NWConnection, CFReadStream, or any other networking "
@@ -102,14 +97,16 @@ public struct TransparencyScreen: View {
                     )
                     Hair(inset: 16)
                     proofRow(
-                        label: "0 trackers (Exodus Privacy)",
-                        status: "Automated scan of the release APK. Re-runs on every update.",
+                        label: "No third-party SDKs (only GRDB linked)",
+                        status: "GRDB is the SQLite wrapper; it never opens a socket. "
+                              + "No analytics SDK, no telemetry, no ad library, no crash reporter. "
+                              + "Privacy Manifest declares 'Data Not Collected' across the board.",
                         value: nil
                     )
                     Hair(inset: 16)
                     proofRow(
                         label: "Encrypted at rest",
-                        status: "Data Protection on iOS · SQLCipher + Keystore on Android.",
+                        status: "iOS Data Protection on the database file. Encrypted while the device is locked.",
                         value: nil
                     )
                 }
@@ -126,7 +123,7 @@ public struct TransparencyScreen: View {
                              detail: "github.com/sid78669/RegardsMobileApp",
                              isAccent: true)
                     Hair(inset: 16)
-                    auditRow("Rebuild the APK",
+                    auditRow("Rebuild the binary",
                              detail: "reproducible-builds.md · compare SHA-256")
                     Hair(inset: 16)
                     auditRow("Watch the network",
@@ -180,7 +177,7 @@ public struct TransparencyScreen: View {
                     .foregroundStyle(RegardsDS.ink)
                 Text(detail)
                     .font(RegardsFont.mono(.caption))
-                    .foregroundStyle(isAccent ? RegardsDS.accent : RegardsDS.muted)
+                    .foregroundStyle(isAccent ? RegardsDS.accentInk : RegardsDS.muted)
             }
             Spacer()
             // Stub — Phase 1 wires these to Safari deep links. Muted until

@@ -135,6 +135,10 @@ struct UpcomingRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityHint("Double-tap to open contact detail.")
+        // Stable identifier for UI tests that need to target a row
+        // specifically (vs. nav-bar actions or segmented-control
+        // buttons that also live on this screen).
+        .accessibilityIdentifier("upcoming.row")
     }
 
     private var accessibilityLabel: String {
