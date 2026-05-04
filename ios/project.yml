@@ -78,6 +78,12 @@ targets:
           NSAllowsLocalNetworking: false
         # Populated in Phase 1 when deep links go live (§8).
         LSApplicationQueriesSchemes: []
+        # §11 user-facing copy for the system Contacts permission prompt.
+        # Read-only on import; write-back uses partial-field CNSaveRequest
+        # (V1 item #11). System Contacts remain the source of truth.
+        NSContactsUsageDescription: >-
+          Regards reads your contacts on this device so you can pick the
+          people you want to stay in touch with. Nothing leaves your device.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sdahiya.regards
