@@ -107,18 +107,17 @@ final class ScreensAccessibilityTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
-                        .waitForExistence(timeout: 10))
+        waitForContactDetailReady(app)
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
     /// Exercises the factory-built Contact Detail push from the **Overdue
-    /// tab** (the new nav-path flow) — the previous ContactDetail test only
+    /// tab** (the new nav-path flow). The previous ContactDetail test only
     /// covers the inline `NavigationLink` flow in `AllContactsScreen`.
     @MainActor
     func testContactDetailFromOverduePassesAudit() throws {
         let app = launchToOverdue()
-        // Target contact-row elements specifically — `screen.overdue` also
+        // Target contact-row elements specifically. `screen.overdue` also
         // hosts the nav-bar "All" button and the segmented-control
         // buttons, so plain `.descendants(matching: .button).firstMatch`
         // catches those first instead of a row. The row button applies
@@ -129,8 +128,7 @@ final class ScreensAccessibilityTests: XCTestCase {
             .matching(identifier: "overdue.row").firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
-                        .waitForExistence(timeout: 10))
+        waitForContactDetailReady(app)
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
@@ -145,8 +143,7 @@ final class ScreensAccessibilityTests: XCTestCase {
             .matching(identifier: "upcoming.row").firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
-                        .waitForExistence(timeout: 10))
+        waitForContactDetailReady(app)
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
@@ -169,7 +166,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         // The hero header text is the only `staticText` child with an
         // `.isHeader` trait on this screen.
         let firstName = firstDetail.staticTexts
-            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .matching(NSPredicate(format: "traits & %llu != 0", UIAccessibilityTraits.header.rawValue))
             .firstMatch.label
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
@@ -181,7 +178,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let secondDetail = app.descendants(matching: .any)["screen.contact-detail"]
         XCTAssertTrue(secondDetail.waitForExistence(timeout: 10))
         let secondName = secondDetail.staticTexts
-            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .matching(NSPredicate(format: "traits & %llu != 0", UIAccessibilityTraits.header.rawValue))
             .firstMatch.label
 
         XCTAssertNotEqual(
@@ -192,6 +189,30 @@ final class ScreensAccessibilityTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// Waits for ContactDetail to be both findable AND fully laid out before
+    /// the audit fires. `screen.contact-detail` becomes findable as soon as
+    /// the identifier is added to the tree, which can happen mid-transition
+    /// while the audit-relevant labels are still being composed. The hero
+    /// header (the contact's display name, marked `.isHeader`) is a stable
+    /// post-layout signal: by the time it's visible to XCUIElement, the
+    /// screen has settled enough to audit cleanly. This was the underlying
+    /// race behind `testContactDetailFromUpcomingPassesAudit` flaking on
+    /// CI with "Label not human-readable" findings during the transition.
+    @MainActor
+    private func waitForContactDetailReady(
+        _ app: XCUIApplication, timeout: TimeInterval = 10
+    ) {
+        let detail = app.descendants(matching: .any)["screen.contact-detail"]
+        XCTAssertTrue(detail.waitForExistence(timeout: timeout),
+                      "Contact Detail screen identifier never appeared.")
+        let header = detail.staticTexts.matching(
+            NSPredicate(format: "traits & %llu != 0",
+                        UIAccessibilityTraits.header.rawValue)
+        ).firstMatch
+        XCTAssertTrue(header.waitForExistence(timeout: timeout),
+                      "Contact Detail hero header never appeared.")
+    }
 
     @MainActor
     private func launchToOverdue() -> XCUIApplication {
