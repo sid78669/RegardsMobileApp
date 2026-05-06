@@ -78,10 +78,10 @@ android/**/google-services.json
 secrets.properties
 keystore.properties
 
-# ---------- Journal working files (drafts stay local) ----------
-# Keep published post .md files tracked; ignore scratch work
-journal/drafts/
-journal/.scratch/
+# ---------- Journal working files (all stay local) ----------
+# Drafts, in-progress posts, published copies — none of it lives in git.
+# Substack is the source of truth; this folder is a working scratchpad.
+journal/
 
 # ---------- Claude / tooling scratch ----------
 .claude/
