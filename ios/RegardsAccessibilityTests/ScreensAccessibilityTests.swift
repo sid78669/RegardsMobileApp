@@ -166,7 +166,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         // The hero header text is the only `staticText` child with an
         // `.isHeader` trait on this screen.
         let firstName = firstDetail.staticTexts
-            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .matching(NSPredicate(format: "traits & %llu != 0", UIAccessibilityTraits.header.rawValue))
             .firstMatch.label
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
@@ -178,7 +178,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         let secondDetail = app.descendants(matching: .any)["screen.contact-detail"]
         XCTAssertTrue(secondDetail.waitForExistence(timeout: 10))
         let secondName = secondDetail.staticTexts
-            .matching(NSPredicate(format: "traits & %d != 0", UIAccessibilityTraits.header.rawValue))
+            .matching(NSPredicate(format: "traits & %llu != 0", UIAccessibilityTraits.header.rawValue))
             .firstMatch.label
 
         XCTAssertNotEqual(
@@ -207,7 +207,7 @@ final class ScreensAccessibilityTests: XCTestCase {
         XCTAssertTrue(detail.waitForExistence(timeout: timeout),
                       "Contact Detail screen identifier never appeared.")
         let header = detail.staticTexts.matching(
-            NSPredicate(format: "traits & %d != 0",
+            NSPredicate(format: "traits & %llu != 0",
                         UIAccessibilityTraits.header.rawValue)
         ).firstMatch
         XCTAssertTrue(header.waitForExistence(timeout: timeout),
