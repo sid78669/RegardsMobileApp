@@ -1,0 +1,99 @@
+name: Audit stress
+
+# Runs the RegardsAccessibilityTests audit suite 5 times on every PR that
+# touches UI or test code. Catches probabilistic flakes during the PR cycle
+# instead of after merge. The main `iOS CI` workflow stays single-run for
+# fast feedback; this workflow gates merges on stable audits.
+#
+# Builds once, then `test-without-building` 5x to keep total runtime around
+# 5–6 minutes per PR after the initial build + downloadPlatform install.
+
+on:
+  pull_request:
+    paths:
+      - "ios/Regards/**"
+      - "ios/RegardsAccessibilityTests/**"
+      - "ios/project.yml"
+      - "ios/Regards.xcodeproj/**"
+      - ".github/workflows/audit-stress.yml"
+
+concurrency:
+  group: audit-stress-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  XCODE_VERSION: "16.2"
+  SIMULATOR: "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest"
+  SCHEME: Regards
+  STRESS_RUNS: "5"
+
+jobs:
+  audit-stress:
+    name: Accessibility audit stress (5x)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      - name: Install iOS platform
+        # Same retry wrapper as `iOS CI` — the CDN flakes intermittently.
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            if xcodebuild -downloadPlatform iOS; then
+              [ "$attempt" -gt 1 ] && echo "downloadPlatform succeeded on attempt $attempt (after retries)"
+              exit 0
+            fi
+            echo "::warning::downloadPlatform failed on attempt $attempt; sleeping 15s before retry"
+            sleep 15
+          done
+          echo "::error::xcodebuild -downloadPlatform iOS failed after 3 attempts"
+          exit 1
+      - name: Build accessibility test bundle once
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Regards.xcodeproj \
+            -scheme "$SCHEME" \
+            -destination "$SIMULATOR" \
+            -configuration Debug \
+            -only-testing:RegardsAccessibilityTests \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build-for-testing \
+            | xcbeautify --renderer github-actions
+      - name: Stress-run audit (${{ env.STRESS_RUNS }}x)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          failed=0
+          for run in $(seq 1 ${{ env.STRESS_RUNS }}); do
+            echo "::group::Audit run $run/${{ env.STRESS_RUNS }}"
+            if xcodebuild \
+                -project Regards.xcodeproj \
+                -scheme "$SCHEME" \
+                -destination "$SIMULATOR" \
+                -configuration Debug \
+                -only-testing:RegardsAccessibilityTests \
+                CODE_SIGNING_ALLOWED=NO \
+                CODE_SIGNING_REQUIRED=NO \
+                CODE_SIGN_IDENTITY="" \
+                test-without-building \
+                | xcbeautify --renderer github-actions
+            then
+              echo "::endgroup::"
+              echo "    run $run: pass"
+            else
+              echo "::endgroup::"
+              echo "::error::Audit run $run/${{ env.STRESS_RUNS }} failed"
+              failed=$((failed + 1))
+            fi
+          done
+          if [ "$failed" -gt 0 ]; then
+            echo "::error::$failed of ${{ env.STRESS_RUNS }} audit runs failed"
+            exit 1
+          fi
+          echo "All ${{ env.STRESS_RUNS }} audit runs passed."
