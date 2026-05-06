@@ -136,3 +136,59 @@ A future sensory-audit tightening PR can revisit any of these if the
 design evolves (e.g., a brighter accent-ink, a scaled brand mark, a
 redesigned hero card) — but the gate stays at the structural set
 until there's a design change to chase.
+
+## Test patterns
+
+How you wait for a UI element matters as much as which element you wait for.
+Three rules for `RegardsAccessibilityTests`, learned from real flakes.
+
+### 1. Don't `waitForExistence` on a predicate-matched query
+
+`waitForExistence(timeout:)` on a plain element query
+(`staticTexts.firstMatch`, `descendants(matching: .any)["screen.id"]`)
+resolves the moment the element appears in the tree. Fast and reliable.
+
+`waitForExistence(timeout:)` on a predicate-matched query
+(`staticTexts.matching(NSPredicate(format: "traits & %llu != 0", ...))`)
+is fragile. XCUI's predicate-matching pass evaluates lazily and observes
+element existence faster than it observes element traits or other
+attributes. Under simulator slowness this lag can exceed the 10s
+timeout, even when the underlying element is visible.
+
+**Rule:** use predicates only for *read-after-known* (read a value when
+you already know the screen is rendered), never for *wait-until-true*.
+
+This was the underlying race behind `testContactDetailPassesAudit`
+flaking on three consecutive main runs in May 2026. The fix was to swap
+the trait-predicate header wait for `detail.staticTexts.firstMatch` —
+same load-done signal, no predicate timing dependency.
+
+### 2. ContactDetail "settled" means a static text exists, not the screen identifier
+
+`screen.contact-detail` becomes findable as soon as the identifier is
+added to the tree, which can happen mid-transition. `viewModel.load()`
+is async; the screen renders a `ProgressView` (no static text) until it
+resolves. Wait for `detail.staticTexts.firstMatch` instead — it only
+resolves when the if-let-loaded body branch has rendered, which is
+when the audit can run cleanly. The helper
+`waitForContactDetailReady(_:)` in `ScreensAccessibilityTests` is the
+canonical implementation.
+
+### 3. Run the audit suite 5x locally before pushing UI changes
+
+Audit failures often have ~1-in-3 hit rates. One CI run is weak signal
+when timing is in play. Run locally before pushing:
+
+```bash
+ios/scripts/audit-stress.sh    # default 5 runs
+ios/scripts/audit-stress.sh 3  # custom run count
+```
+
+The script builds once and runs the audit suite N times via
+`test-without-building`, exits non-zero on any failure. Total runtime
+on a recent Mac: ~3 min.
+
+CI also runs the audit 5x on every PR via
+`.github/workflows/audit-stress.yml`. That workflow is the merge gate
+for audit reliability; the local script is the cheap pre-push check
+that saves you from waiting for CI to surface a flake.
