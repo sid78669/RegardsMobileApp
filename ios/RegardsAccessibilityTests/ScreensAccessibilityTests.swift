@@ -107,7 +107,8 @@ final class ScreensAccessibilityTests: XCTestCase {
             .firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        waitForContactDetailReady(app)
+        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
@@ -128,7 +129,8 @@ final class ScreensAccessibilityTests: XCTestCase {
             .matching(identifier: "overdue.row").firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        waitForContactDetailReady(app)
+        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
@@ -143,7 +145,8 @@ final class ScreensAccessibilityTests: XCTestCase {
             .matching(identifier: "upcoming.row").firstMatch
         XCTAssertTrue(firstRow.waitForExistence(timeout: 10))
         firstRow.tap()
-        waitForContactDetailReady(app)
+        XCTAssertTrue(app.descendants(matching: .any)["screen.contact-detail"]
+                        .waitForExistence(timeout: 10))
         try app.performAccessibilityAudit(for: Self.structuralAuditCategories)
     }
 
@@ -189,37 +192,6 @@ final class ScreensAccessibilityTests: XCTestCase {
     }
 
     // MARK: - Helpers
-
-    /// Waits for ContactDetail to be both findable AND fully laid out before
-    /// the audit fires.
-    ///
-    /// Two-stage wait. First, `screen.contact-detail` becomes findable as
-    /// soon as the identifier is added to the tree, which can happen
-    /// mid-transition while the audit-relevant labels are still being
-    /// composed. Second, `viewModel.load()` is async and the screen renders
-    /// a `ProgressView` (no static text) until it resolves. So we wait for
-    /// any static text to appear inside `detail`, which is true exactly
-    /// when the if-let-loaded-body branch becomes active and the hero,
-    /// cards, and footer are real.
-    ///
-    /// The first version of this helper used a `traits & .header` predicate
-    /// over `staticTexts` to find the hero specifically. That worked on
-    /// some test orderings but flaked under simulator slowness on the third
-    /// cold-launch in a row (the Contacts-tab path's
-    /// `testContactDetailPassesAudit`) — the trait-matching subquery
-    /// resolves later than the underlying staticText. `firstMatch` over
-    /// staticTexts is the same load-done signal without the predicate
-    /// timing fragility.
-    @MainActor
-    private func waitForContactDetailReady(
-        _ app: XCUIApplication, timeout: TimeInterval = 10
-    ) {
-        let detail = app.descendants(matching: .any)["screen.contact-detail"]
-        XCTAssertTrue(detail.waitForExistence(timeout: timeout),
-                      "Contact Detail screen identifier never appeared.")
-        XCTAssertTrue(detail.staticTexts.firstMatch.waitForExistence(timeout: timeout),
-                      "Contact Detail static text never appeared (load() may be hung).")
-    }
 
     @MainActor
     private func launchToOverdue() -> XCUIApplication {
