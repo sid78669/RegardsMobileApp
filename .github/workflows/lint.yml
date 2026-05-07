@@ -3,15 +3,14 @@ name: Lint
 on:
   push:
     branches: [main]
-    paths:
-      - "ios/**"
-      - ".github/workflows/lint.yml"
-      - ".swiftlint.yml"
   pull_request:
-    paths:
-      - "ios/**"
-      - ".github/workflows/lint.yml"
-      - ".swiftlint.yml"
+
+# Path filters were intentionally removed: branch protection requires
+# this check to pass, and a path-filtered workflow doesn't run on
+# unrelated-paths PRs (gitignore tweaks, root README edits, etc.). The
+# resulting "required check missing" status blocks merge. We pay ~30s
+# of trivial CI on every PR in exchange for the gate always being
+# answerable.
 
 concurrency:
   group: lint-${{ github.ref }}
