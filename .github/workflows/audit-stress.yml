@@ -10,12 +10,12 @@ name: Audit stress
 
 on:
   pull_request:
-    paths:
-      - "ios/Regards/**"
-      - "ios/RegardsAccessibilityTests/**"
-      - "ios/project.yml"
-      - "ios/Regards.xcodeproj/**"
-      - ".github/workflows/audit-stress.yml"
+
+# Path filters were intentionally removed: this workflow is gated by
+# branch protection, and a path-filtered workflow doesn't run on
+# unrelated-paths PRs. The resulting "required check missing" status
+# blocks merge. We pay ~7 min of CI on every PR in exchange for the
+# gate always being answerable.
 
 concurrency:
   group: audit-stress-${{ github.ref }}
